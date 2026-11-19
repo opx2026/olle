@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Šašlõkimarinaadi Kalkulaator (Sauda maitseainega)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            animation: slideIn 0.6s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .calculator {
+            padding: 40px;
+        }
+        
+        .weight-selector {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 2px solid #e1e7ff;
+        }
+        
+        .weight-selector h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .weight-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .weight-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            padding: 12px 18px;
+            border-radius: 50px;
+            border: 2px solid #ddd;
+            transition: all 0.3s ease;
+        }
+        
+        .weight-input:focus-within {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .weight-input input {
+            border: none;
+            outline: none;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+            width: 100px;
+            text-align: center;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            min-width: 45px;
+        }
+        
+        .btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .preset-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .preset-btn {
+            background: #48cae4;
+            font-size: 0.95em;
+            padding: 10px 16px;
+        }
+        
+        .preset-btn:hover {
+            background: #0096c7;
+        }
+        
+        .ingredients {
+            display: grid;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .ingredient {
+            background: white;
+            border: 2px solid #f1f3f4;
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ingredient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        }
+        
+        .ingredient:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .ingredient-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .ingredient-name {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .ingredient-amount {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #667eea;
+            background: #f8f9ff;
+            padding: 8px 15px;
+            border-radius: 25px;
+            border: 2px solid #e1e7ff;
+        }
+        
+        .ingredient-notes {
+            color: #666;
+            font-style: italic;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+        
+        .special-note {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            border: 2px solid #e17055;
+            color: #2d3436;
+        }
+        
+        .special-note::before {
+            background: linear-gradient(135deg, #e17055, #d63031);
+        }
+        
+        .special-note .ingredient-amount {
+            background: rgba(255, 255, 255, 0.8);
+            color: #2d3436;
+            border-color: #e17055;
+        }
+        
+        .warning-text {
+            font-weight: bold;
+            color: #d63031;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .calculator {
+                padding: 20px;
+            }
+            
+            .weight-controls {
+                justify-content: center;
+            }
+            
+            .preset-buttons {
+                justify-content: center;
+            }
+            
+            .ingredient-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .ingredient-amount {
+                text-align: center;
+            }
+        }
+    </style>
+
+<style id="tuuning">
+/* Ühtne tume teraskujundus (sama mis avalehel). Trükivaadet ei muudeta. */
+@media screen {
+  html body {
+    background: #04060b radial-gradient(120% 85% at 50% 0%, #17243a 0%, #080d16 52%, #04060b 100%) fixed !important;
+    color: #d5dfec !important;
+    font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif !important;
+  }
+  body .container, body > .controls, body .container > .controls {
+    background: linear-gradient(165deg, #141d2c, #0a0f19) !important;
+    border: 1px solid rgba(170,195,230,.16) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 30px 80px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.07) !important;
+    color: #d5dfec !important;
+  }
+  body .container > .controls { box-shadow: none !important; border: 0 !important; background: transparent !important; }
+  body .header {
+    background: linear-gradient(180deg, #223149, #111a29) !important;
+    border-bottom: 1px solid rgba(170,195,230,.16) !important;
+    color: #eef4fb !important;
+  }
+  body h1, body h2 { color: #eef4fb !important; text-shadow: none !important; font-weight: 600 !important; letter-spacing: -.01em; }
+  body .header p, body .controls > p { color: #9db0c8 !important; opacity: 1 !important; }
+  body .weight-input, body .portion-input, body .weight-selector, body .instructions, body .timing, body .cooking,
+  body .tips, body .vinegar-choice, body .cooking-tips, body .variations, body .adjustments, body .info,
+  body .recipe-table, body .ingredients, body .calculator {
+    background: rgba(255,255,255,.035) !important;
+    border: 1px solid rgba(170,195,230,.13) !important;
+    border-left: 3px solid #7f9cc0 !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    color: #d5dfec !important;
+  }
+  body .calculator, body .ingredients { background: transparent !important; border: 0 !important; }
+  body .weight-selector .weight-input { background: transparent !important; border: 0 !important; }
+  body h3, body h4, body label, body strong, body .ingredient, body .ingredient-name, body .ingredient-header { color: #eaf1fa !important; }
+  body .amount, body .ingredient-amount, body .weight-input span, body .portion-input span { color: #9fc4ee !important; }
+  body table th { background: #1b273a !important; color: #cfdcec !important; }
+  body table td { border-bottom-color: rgba(170,195,230,.1) !important; color: #d5dfec !important; }
+  body table tr:hover { background: rgba(255,255,255,.04) !important; }
+  body [class$="-item"], body .ingredient-row, body .ingredient-card {
+    background: rgba(255,255,255,.045) !important;
+    border: 1px solid rgba(170,195,230,.13) !important;
+    color: #d5dfec !important;
+    box-shadow: none !important;
+  }
+  body li, body p, body td, body span { color: inherit; }
+  /* koostisosade kaardid (šašlõkimarinaad) */
+  body div.ingredient {
+    background: rgba(255,255,255,.045) !important;
+    border: 1px solid rgba(170,195,230,.13) !important;
+    border-left: 3px solid #7f9cc0 !important;
+    border-radius: 12px !important; box-shadow: none !important; transform: none !important;
+  }
+  body div.ingredient::before { display: none !important; }
+  body div.ingredient .ingredient-amount {
+    background: rgba(159,196,238,.1) !important; border: 1px solid rgba(159,196,238,.35) !important; color: #b9d5f5 !important;
+  }
+  body div.ingredient .ingredient-notes { color: #9db0c8 !important; }
+  body div.ingredient.special-note { background: rgba(240,180,90,.08) !important; border-color: rgba(240,180,90,.4) !important; border-left-color: #f0b45a !important; }
+  body div.ingredient .warning-text { color: #f6c57e !important; }
+  body #fileInfo { border: 0 !important; background: transparent !important; color: #9db0c8 !important; padding-left: 0 !important; }
+  body input[type=number], body input[type=text], body select {
+    background: #0a0f18 !important; color: #eef4fb !important;
+    border: 1px solid rgba(170,195,230,.32) !important; border-radius: 10px !important;
+  }
+  body input:focus, body select:focus { border-color: #9fc4ee !important; box-shadow: 0 0 0 3px rgba(159,196,238,.22) !important; outline: none !important; }
+  body input[type=file] { color: #9db0c8 !important; }
+  body button, body .btn {
+    background: linear-gradient(180deg, #2c3d57, #182336) !important;
+    color: #eef4fb !important;
+    border: 1px solid rgba(180,205,240,.3) !important;
+    border-radius: 999px !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 6px 18px rgba(0,0,0,.35) !important;
+    text-shadow: none !important;
+  }
+  body button:hover:not(:disabled), body .btn:hover:not(:disabled) { background: linear-gradient(180deg, #41587a, #22324b) !important; transform: none !important; }
+  body button:disabled { opacity: .45 !important; cursor: not-allowed; }
+  body :focus-visible { outline: 2px solid #9fc4ee; outline-offset: 2px; }
+  .tagasi {
+    position: fixed; top: 14px; left: 14px; z-index: 50;
+    font: 500 .9rem/1 "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; color: #dfe8f4; text-decoration: none;
+    padding: .65rem 1.05rem; border-radius: 999px;
+    background: linear-gradient(180deg, rgba(150,175,210,.24), rgba(40,55,80,.4));
+    border: 1px solid rgba(190,210,240,.28);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 8px 24px rgba(0,0,0,.45);
+  }
+  .tagasi:hover { color: #fff; border-color: rgba(210,228,250,.55); }
+  body { padding-top: 64px !important; }
+}
+@media print { .tagasi { display: none !important; } }
+</style>
+</head>
+<body>
+<a class="tagasi" href="../">Avaleht</a>
+    <div class="container">
+        <div class="header">
+            <h1>🍖 Šašlõkimarinaadi kalkulaator(Sauda maitseainega)</h1>
+            <p>Arvuta õiged kogused liha kilogrammide järgi</p>
+        </div>
+        
+        <div class="calculator">
+            <div class="weight-selector">
+                <h3>Mitu kilogrammi liha marineerida?</h3>
+                <div class="weight-controls">
+                    <div class="weight-input">
+                        <button class="btn" onclick="changeWeight(-0.1)">-</button>
+                        <input type="number" id="weight" value="1.0" min="0.1" step="0.1" onchange="updateIngredients()">
+                        <button class="btn" onclick="changeWeight(0.1)">+</button>
+                        <span>kg</span>
+                    </div>
+                    
+                    <div class="preset-buttons">
+                        <button class="btn preset-btn" onclick="setWeight(0.5)">0,5 kg</button>
+                        <button class="btn preset-btn" onclick="setWeight(1.0)">1,0 kg</button>
+                        <button class="btn preset-btn" onclick="setWeight(1.5)">1,5 kg</button>
+                        <button class="btn preset-btn" onclick="setWeight(2.0)">2,0 kg</button>
+                        <button class="btn preset-btn" onclick="setWeight(3.0)">3,0 kg</button>
+                        <button class="btn preset-btn" onclick="setWeight(5.0)">5,0 kg</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ingredients" id="ingredients">
+                <!-- Ingredients will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Base recipe for 1 kg of meat
+        const baseRecipe = [
+            {
+                name: "6% veiniäädikas",
+                amount: 8,
+                unit: "spl",
+                volumeUnit: "(1,2 dl)",
+                notes: "Peamine pehmendaja",
+                special: false
+            },
+            {
+                name: "Oliivõli",
+                amount: 4,
+                unit: "spl",
+                volumeUnit: "(0,6 dl)",
+                notes: "Maitse ülekandumiseks",
+                special: false
+            },
+            {
+                name: "Suhkur",
+                amount: 1,
+                unit: "spl",
+                volumeUnit: "",
+                notes: "Tasakaalustab äädika happelisust",
+                special: false
+            },
+            {
+                name: "Sibul",
+                amount: 1,
+                unit: "tk",
+                volumeUnit: "",
+                notes: "Õhukesteks viiludeks",
+                special: false
+            },
+            {
+                name: "Tsillipulber",
+                amount: 0.5,
+                unit: "tl",
+                volumeUnit: "",
+                notes: "Maitsevalik (võib rohkem lisada)",
+                special: false
+            },
+            {
+                name: "Maitseainesegu",
+                amount: 50,
+                unit: "g",
+                volumeUnit: "",
+                notes: "Sisaldab piisavalt soola, ära lisa lisasoola!",
+                special: true
+            }
+        ];
+
+        function formatAmount(amount) {
+            if (amount === Math.floor(amount)) {
+                return amount.toString();
+            } else {
+                return amount.toFixed(1).replace(/\.?0+$/, '');
+            }
+        }
+
+        function calculateVolumeEquivalent(splAmount) {
+            const dlAmount = (splAmount * 0.15) / 10;
+            if (dlAmount >= 1) {
+                return `(${formatAmount(dlAmount).replace('.', ',')} dl)`;
+            } else {
+                const mlAmount = dlAmount * 100;
+                return `(${formatAmount(mlAmount)} ml)`;
+            }
+        }
+
+        function updateIngredients() {
+            const weight = parseFloat(document.getElementById('weight').value) || 1.0;
+            const ingredientsContainer = document.getElementById('ingredients');
+            
+            ingredientsContainer.innerHTML = '';
+            
+            baseRecipe.forEach(ingredient => {
+                const scaledAmount = ingredient.amount * weight;
+                const ingredientDiv = document.createElement('div');
+                ingredientDiv.className = `ingredient ${ingredient.special ? 'special-note' : ''}`;
+                
+                let volumeDisplay = ingredient.volumeUnit;
+                if (ingredient.unit === 'spl' && !ingredient.volumeUnit) {
+                    volumeDisplay = calculateVolumeEquivalent(scaledAmount);
+                } else if (ingredient.unit === 'spl' && ingredient.volumeUnit) {
+                    const baseVolume = parseFloat(ingredient.volumeUnit.match(/[\d,]+/)[0].replace(',', '.'));
+                    const scaledVolume = baseVolume * weight;
+                    if (scaledVolume >= 1) {
+                        volumeDisplay = `(${formatAmount(scaledVolume).replace('.', ',')} dl)`;
+                    } else {
+                        volumeDisplay = `(${formatAmount(scaledVolume * 100)} ml)`;
+                    }
+                }
+                
+                // Format the scaled amount
+                let displayAmount;
+                if (ingredient.unit === 'tk') {
+                    displayAmount = Math.ceil(scaledAmount); // Round up for pieces
+                } else {
+                    displayAmount = formatAmount(scaledAmount);
+                }
+                
+                const notesClass = ingredient.special ? 'warning-text' : '';
+                
+                ingredientDiv.innerHTML = `
+                    <div class="ingredient-header">
+                        <div class="ingredient-name">${ingredient.name}</div>
+                        <div class="ingredient-amount">
+                            ${displayAmount} ${ingredient.unit} ${volumeDisplay}
+                        </div>
+                    </div>
+                    <div class="ingredient-notes ${notesClass}">${ingredient.notes}</div>
+                `;
+                
+                ingredientsContainer.appendChild(ingredientDiv);
+            });
+        }
+
+        function changeWeight(delta) {
+            const weightInput = document.getElementById('weight');
+            const currentValue = parseFloat(weightInput.value) || 1.0;
+            const newValue = Math.max(0.1, Math.round((currentValue + delta) * 10) / 10);
+            weightInput.value = newValue.toFixed(1);
+            updateIngredients();
+        }
+
+        function setWeight(value) {
+            document.getElementById('weight').value = value.toFixed(1);
+            updateIngredients();
+        }
+
+        // Initialize the calculator
+        updateIngredients();
+    </script>
+</body>
+</html>
