@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kana rinnafilee marinaadi kalkulaator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .weight-input {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 2px dashed #dee2e6;
+        }
+
+        .weight-input label {
+            display: block;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .weight-input input {
+            font-size: 2em;
+            padding: 15px;
+            border: 3px solid #74b9ff;
+            border-radius: 8px;
+            width: 200px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .weight-input input:focus {
+            outline: none;
+            border-color: #00b894;
+            box-shadow: 0 0 20px rgba(0, 184, 148, 0.3);
+        }
+
+        .weight-input span {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #74b9ff;
+            margin-left: 10px;
+        }
+
+        .recipe-table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .recipe-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .recipe-table th {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 20px;
+            font-size: 1.1em;
+            text-align: left;
+        }
+
+        .recipe-table td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .recipe-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .ingredient {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .amount {
+            font-size: 1.1em;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .instructions {
+            background: #e8f5e8;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #27ae60;
+        }
+
+        .instructions h3 {
+            color: #27ae60;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .timing {
+            background: #fff3cd;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #ffc107;
+        }
+
+        .timing h3 {
+            color: #856404;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .timing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .timing-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ffeaa7;
+        }
+
+        .timing-item h4 {
+            color: #d68910;
+            margin-bottom: 5px;
+        }
+
+        .cooking {
+            background: #ffe8e8;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #ff6b6b;
+        }
+
+        .cooking h3 {
+            color: #e55353;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .cooking-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .cooking-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ff7675;
+        }
+
+        .cooking-item h4 {
+            color: #d63031;
+            margin-bottom: 5px;
+        }
+
+        .tips {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 25px;
+            border-left: 5px solid #2196f3;
+        }
+
+        .tips h3 {
+            color: #1976d2;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .tips ul {
+            margin-left: 20px;
+        }
+
+        .tips li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .vinegar-choice {
+            background: #f3e5f5;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 25px;
+            border-left: 5px solid #9c27b0;
+        }
+
+        .vinegar-choice h3 {
+            color: #7b1fa2;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .vinegar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .vinegar-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ce93d8;
+        }
+
+        .vinegar-item h4 {
+            color: #8e24aa;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .weight-input input {
+                width: 150px;
+                font-size: 1.5em;
+            }
+            
+            .recipe-table {
+                overflow-x: auto;
+            }
+            
+            .recipe-table table {
+                min-width: 100%;
+                font-size: 0.9em;
+            }
+            
+            .recipe-table th,
+            .recipe-table td {
+                padding: 8px;
+                font-size: 0.85em;
+                white-space: nowrap;
+            }
+            
+            .recipe-table td:last-child {
+                white-space: normal;
+                max-width: 120px;
+                word-wrap: break-word;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .recipe-table {
+                font-size: 0.8em;
+            }
+            
+            .recipe-table th,
+            .recipe-table td {
+                padding: 6px;
+                font-size: 0.8em;
+            }
+            
+            .recipe-table td:last-child {
+                max-width: 100px;
+            }
+            
+            .ingredient {
+                font-size: 0.9em;
+            }
+            
+            .amount {
+                font-size: 0.95em;
+            }
+        }
+    </style>
+
+<style id="tuuning">
+/* Ühtne tume teraskujundus (sama mis avalehel). Trükivaadet ei muudeta. */
+@media screen {
+  html body {
+    background: #04060b radial-gradient(120% 85% at 50% 0%, #17243a 0%, #080d16 52%, #04060b 100%) fixed !important;
+    color: #d5dfec !important;
+    font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif !important;
+  }
+  body .container, body > .controls, body .container > .controls {
+    background: linear-gradient(165deg, #141d2c, #0a0f19) !important;
+    border: 1px solid rgba(170,195,230,.16) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 30px 80px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.07) !important;
+    color: #d5dfec !important;
+  }
+  body .container > .controls { box-shadow: none !important; border: 0 !important; background: transparent !important; }
+  body .header {
+    background: linear-gradient(180deg, #223149, #111a29) !important;
+    border-bottom: 1px solid rgba(170,195,230,.16) !important;
+    color: #eef4fb !important;
+  }
+  body h1, body h2 { color: #eef4fb !important; text-shadow: none !important; font-weight: 600 !important; letter-spacing: -.01em; }
+  body .header p, body .controls > p { color: #9db0c8 !important; opacity: 1 !important; }
+  body .weight-input, body .portion-input, body .weight-selector, body .instructions, body .timing, body .cooking,
+  body .tips, body .vinegar-choice, body .cooking-tips, body .variations, body .adjustments, body .info,
+  body .recipe-table, body .ingredients, body .calculator {
+    background: rgba(255,255,255,.035) !important;
+    border: 1px solid rgba(170,195,230,.13) !important;
+    border-left: 3px solid #7f9cc0 !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    color: #d5dfec !important;
+  }
+  body .calculator, body .ingredients { background: transparent !important; border: 0 !important; }
+  body .weight-selector .weight-input { background: transparent !important; border: 0 !important; }
+  body h3, body h4, body label, body strong, body .ingredient, body .ingredient-name, body .ingredient-header { color: #eaf1fa !important; }
+  body .amount, body .ingredient-amount, body .weight-input span, body .portion-input span { color: #9fc4ee !important; }
+  body table th { background: #1b273a !important; color: #cfdcec !important; }
+  body table td { border-bottom-color: rgba(170,195,230,.1) !important; color: #d5dfec !important; }
+  body table tr:hover { background: rgba(255,255,255,.04) !important; }
+  body [class$="-item"], body .ingredient-row, body .ingredient-card {
+    background: rgba(255,255,255,.045) !important;
+    border: 1px solid rgba(170,195,230,.13) !important;
+    color: #d5dfec !important;
+    box-shadow: none !important;
+  }
+  body li, body p, body td, body span { color: inherit; }
+  /* koostisosade kaardid (šašlõkimarinaad) */
+  body div.ingredient {
+    background: rgba(255,255,255,.045) !important;
+    border: 1px solid rgba(170,195,230,.13) !important;
+    border-left: 3px solid #7f9cc0 !important;
+    border-radius: 12px !important; box-shadow: none !important; transform: none !important;
+  }
+  body div.ingredient::before { display: none !important; }
+  body div.ingredient .ingredient-amount {
+    background: rgba(159,196,238,.1) !important; border: 1px solid rgba(159,196,238,.35) !important; color: #b9d5f5 !important;
+  }
+  body div.ingredient .ingredient-notes { color: #9db0c8 !important; }
+  body div.ingredient.special-note { background: rgba(240,180,90,.08) !important; border-color: rgba(240,180,90,.4) !important; border-left-color: #f0b45a !important; }
+  body div.ingredient .warning-text { color: #f6c57e !important; }
+  body #fileInfo { border: 0 !important; background: transparent !important; color: #9db0c8 !important; padding-left: 0 !important; }
+  body input[type=number], body input[type=text], body select {
+    background: #0a0f18 !important; color: #eef4fb !important;
+    border: 1px solid rgba(170,195,230,.32) !important; border-radius: 10px !important;
+  }
+  body input:focus, body select:focus { border-color: #9fc4ee !important; box-shadow: 0 0 0 3px rgba(159,196,238,.22) !important; outline: none !important; }
+  body input[type=file] { color: #9db0c8 !important; }
+  body button, body .btn {
+    background: linear-gradient(180deg, #2c3d57, #182336) !important;
+    color: #eef4fb !important;
+    border: 1px solid rgba(180,205,240,.3) !important;
+    border-radius: 999px !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 6px 18px rgba(0,0,0,.35) !important;
+    text-shadow: none !important;
+  }
+  body button:hover:not(:disabled), body .btn:hover:not(:disabled) { background: linear-gradient(180deg, #41587a, #22324b) !important; transform: none !important; }
+  body button:disabled { opacity: .45 !important; cursor: not-allowed; }
+  body :focus-visible { outline: 2px solid #9fc4ee; outline-offset: 2px; }
+  .tagasi {
+    position: fixed; top: 14px; left: 14px; z-index: 50;
+    font: 500 .9rem/1 "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; color: #dfe8f4; text-decoration: none;
+    padding: .65rem 1.05rem; border-radius: 999px;
+    background: linear-gradient(180deg, rgba(150,175,210,.24), rgba(40,55,80,.4));
+    border: 1px solid rgba(190,210,240,.28);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 8px 24px rgba(0,0,0,.45);
+  }
+  .tagasi:hover { color: #fff; border-color: rgba(210,228,250,.55); }
+  body { padding-top: 64px !important; }
+}
+@media print { .tagasi { display: none !important; } }
+</style>
+</head>
+<body>
+<a class="tagasi" href="../">Avaleht</a>
+    <div class="container">
+        <div class="header">
+            <h1>🐔 Kana rinnafilee marinaadi kalkulaator</h1>
+            <p>Veiniäädika marinaad kana rinnafileele</p>
+        </div>
+        
+        <div class="content">
+            <div class="weight-input">
+                <label for="chickenWeight">Kana rinnafilee kogus:</label>
+                <input type="number" id="chickenWeight" value="1.00" min="0.01" step="0.01" onchange="calculateIngredients()">
+                <span>kg</span>
+            </div>
+
+            <div class="recipe-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Koostisosa</th>
+                            <th>Kogus</th>
+                            <th>Märkused</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ingredientsTable">
+                        <tr>
+                            <td class="ingredient">Veiniäädikas</td>
+                            <td class="amount" id="vinegar">6 spl (0,9 dl)</td>
+                            <td>Punane või valge veiniäädikas</td>
+                        </tr>
+                        <tr>
+                            <td class="ingredient">Oliivõli</td>
+                            <td class="amount" id="oil">3 spl</td>
+                            <td>Maitse ülekandumiseks</td>
+                        </tr>
+                        <tr>
+                            <td class="ingredient">Broileri maitseaine</td>
+                            <td class="amount" id="seasoning">1 spl</td>
+                            <td>Sisaldab juba soola</td>
+                        </tr>
+                        <tr>
+                            <td class="ingredient">Sool</td>
+                            <td class="amount" id="salt">0,5 tl</td>
+                            <td>Kui vaja rohkem soolasust</td>
+                        </tr>
+                        <tr>
+                            <td class="ingredient">Küüslauk</td>
+                            <td class="amount" id="garlic">1-1,5 tl</td>
+                            <td>Purustatud (vastab 2-3 küünele)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="instructions">
+                <h3>🔧 Valmistamise juhised</h3>
+                <ol>
+                    <li><strong>Sega vedelikud:</strong> veiniäädikas ja oliivõli</li>
+                    <li><strong>Lisa maitseained:</strong> broileri maitseaine ja sool</li>
+                    <li><strong>Lisa küüslauk:</strong> purustatud küüslauk</li>
+                    <li><strong>Sega hoolikalt</strong> kuni kõik on ühtlaselt segatud</li>
+                    <li><strong>Pane kana marinaadi</strong> mittereaktiivses nõus</li>
+                    <li><strong>Kata ja pane külmkappi</strong></li>
+                </ol>
+            </div>
+
+            <div class="timing">
+                <h3>⏰ Marineerimise ajad</h3>
+                <div class="timing-grid">
+                    <div class="timing-item">
+                        <h4>30 minutit - 1 tund</h4>
+                        <p>Kerge maitse, kiirem variant. Sobib kui kiire.</p>
+                    </div>
+                    <div class="timing-item">
+                        <h4>1-2 tundi</h4>
+                        <p>Optimaalne maitse. Parim valik kana jaoks!</p>
+                    </div>
+                    <div class="timing-item">
+                        <h4>4-6 tundi</h4>
+                        <p>Maksimaalne aeg. Rohkem ei ole vaja.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cooking">
+                <h3>🔥 Küpsetamise juhised</h3>
+                <div class="cooking-grid">
+                    <div class="cooking-item">
+                        <h4>Grillpann</h4>
+                        <p>6-8 minutit mõlemalt poolelt. Kuum pann, keskmine tulel.</p>
+                    </div>
+                    <div class="cooking-item">
+                        <h4>Ahi</h4>
+                        <p>200°C, 20-25 minutit. Õhukemad tükid kiiremini.</p>
+                    </div>
+                    <div class="cooking-item">
+                        <h4>Sisemperatuur</h4>
+                        <p>75°C - kasutage lihatermomeetrit kindluse jaoks.</p>
+                    </div>
+                    <div class="cooking-item">
+                        <h4>Oota</h4>
+                        <p>5 minutit pärast küpsetamist. Mahla jaotumiseks.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tips">
+                <h3>💡 Olulised nõuanded</h3>
+                <ul>
+                    <li><strong>Lõika õhemaks:</strong> Kana rind pooleks - kiiremini marineerub ja küpseb</li>
+                    <li><strong>Kuivata enne küpsetamist:</strong> Paberrätikutega kuivaks</li>
+                    <li><strong>Hoia külmikus:</strong> Alati marineerimise ajal</li>
+                    <li><strong>Mittereaktiivne nõu:</strong> Klaas, keraamiline või roostevaba teras</li>
+                    <li><strong>Ära marineeri liiga kaua:</strong> Kana muutub äädika toimel "küpsetatuks"</li>
+                    <li><strong>Ühtlane paksus:</strong> Löö liha õhemaks ühtlase küpse jaoks</li>
+                </ul>
+            </div>
+
+            <div class="vinegar-choice">
+                <h3>🍷 Äädika valik</h3>
+                <div class="vinegar-grid">
+                    <div class="vinegar-item">
+                        <h4>Punane veiniäädikas</h4>
+                        <p>Tugevam, täidlasem maitse. Sobib hästi vürtside ja küüslauguga.</p>
+                    </div>
+                    <div class="vinegar-item">
+                        <h4>Valge veiniäädikas</h4>
+                        <p>Õrnem, peenem maitse. Ei värvi kana liha tumedamaks.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateIngredients() {
+            const weight = parseFloat(document.getElementById('chickenWeight').value);
+            
+            if (weight <= 0) {
+                return;
+            }
+
+            // Base amounts for 1 kg
+            const baseAmounts = {
+                vinegar: 6,      // spl
+                oil: 3,          // spl
+                seasoning: 1,    // spl
+                salt: 0.5,       // tl
+                garlicMin: 1,    // tl
+                garlicMax: 1.5   // tl
+            };
+
+            // Calculate new amounts
+            const newAmounts = {
+                vinegar: (baseAmounts.vinegar * weight).toFixed(1),
+                vinegarDl: (baseAmounts.vinegar * weight * 0.15).toFixed(1),
+                oil: (baseAmounts.oil * weight).toFixed(1),
+                seasoning: (baseAmounts.seasoning * weight).toFixed(1),
+                salt: (baseAmounts.salt * weight).toFixed(1),
+                garlicMin: (baseAmounts.garlicMin * weight).toFixed(1),
+                garlicMax: (baseAmounts.garlicMax * weight).toFixed(1)
+            };
+
+            // Update table
+            document.getElementById('vinegar').textContent = newAmounts.vinegar + ' spl (' + newAmounts.vinegarDl + ' dl)';
+            document.getElementById('oil').textContent = newAmounts.oil + ' spl';
+            document.getElementById('seasoning').textContent = newAmounts.seasoning + ' spl';
+            document.getElementById('salt').textContent = newAmounts.salt + ' tl';
+            document.getElementById('garlic').textContent = newAmounts.garlicMin + '-' + newAmounts.garlicMax + ' tl';
+        }
+
+        // Initialize with default values
+        calculateIngredients();
+    </script>
+</body>
+</html>
