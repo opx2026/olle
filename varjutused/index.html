@@ -42,10 +42,51 @@ td.below { color:#a0a0a0 !important; text-decoration:line-through; }
 .coords { font-size:12px; color:var(--sea); font-variant-numeric:tabular-nums; }
 @media (max-width:720px){ main{flex-direction:column;} #map{height:44vh;flex:none;} aside{width:100%;border-left:none;border-top:1px solid var(--line);} }
 </style>
+
+<style id="tuuning">
+/* Tume teraskujundus nagu avalehel */
+:root { --ink:#d5dfec; --sea:#9db0c8; --mist:#04060b; --umbra:#cfe0f7; --corona:#e3b341; --partial:#f08a5d; --line:rgba(170,195,230,.16); }
+html body {
+  background: #04060b radial-gradient(120% 85% at 50% 0%, #17243a 0%, #080d16 52%, #04060b 100%) fixed;
+  color: var(--ink); font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+body > header { background: linear-gradient(180deg, rgba(34,49,73,.55), rgba(17,26,41,.2)); padding-right: 150px; }
+header h1, .type, .stat .v { font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; font-weight: 600; letter-spacing: -.01em; }
+header h1 { color: #eef4fb; }
+aside { background: linear-gradient(180deg, rgba(20,29,44,.75), rgba(10,15,25,.75)); }
+select {
+  background: #0a0f18; color: #eef4fb; border: 1px solid rgba(170,195,230,.32); border-radius: 10px;
+}
+select:focus { outline: none; border-color: #9fc4ee; box-shadow: 0 0 0 3px rgba(159,196,238,.22); }
+input[type=checkbox] { accent-color: #9fc4ee; }
+.stat, .type, table.times, aside > div[style*="background:#fff"] {
+  background: rgba(255,255,255,.04) !important; border: 1px solid var(--line) !important; color: var(--ink);
+}
+.stat, .type, aside > div[style*="background:#fff"] { border-radius: 12px !important; }
+.stat .v { color: #eef4fb; }
+.type.total { background: linear-gradient(180deg, #33476a, #1c2a41) !important; color: #f5e6c8; border-color: rgba(190,210,240,.35) !important; }
+.type.annular { border-left: 4px solid var(--corona) !important; border-radius: 0 12px 12px 0 !important; }
+.type.partial { border-left: 4px solid var(--partial) !important; border-radius: 0 12px 12px 0 !important; }
+table.times td { border-top-color: rgba(170,195,230,.1); }
+table.times td:last-child { color: #b9d5f5; }
+td.below { color: #6f7f94 !important; }
+#moondisc { fill: #0b111c; }                 /* kuu = paneeli taust, et päikesest jääks „amps" */
+.safety { background: rgba(225,90,90,.1); border-color: rgba(225,120,120,.4); color: #f2bcbc; }
+/* kaart: tumedaks toonitud plaadid ja terasetooni nupud */
+#map { background: #060a12; }
+.leaflet-tile-pane { filter: invert(1) hue-rotate(195deg) brightness(.82) contrast(.92) saturate(.55); }
+.leaflet-bar { border: 1px solid rgba(190,210,240,.3) !important; box-shadow: 0 8px 24px rgba(0,0,0,.45) !important; }
+.leaflet-bar a, .leaflet-bar a:hover { background: #141d2c; color: #dfe8f4; border-bottom-color: rgba(170,195,230,.2); }
+.leaflet-bar a:hover { background: #22324b; }
+.leaflet-control-attribution { background: rgba(10,15,25,.8) !important; color: #9db0c8 !important; }
+.leaflet-control-attribution a { color: #b9d5f5 !important; }
+:focus-visible { outline: 2px solid #9fc4ee; outline-offset: 2px; }
+</style>
 <style id="menyy-css">
   /* Menüü: nupp viib avalehele, hiirega peale minnes avaneb teiste lehtede loend */
-  .menyy { --m-varv:#1c2733; --m-bg:#fff; --m-serv:1px solid #d8d4ca; --m-vari:0 2px 8px rgba(28,39,51,.12); --m-h-bg:#f2f0ea; --m-h-varv:#1c2733;
-    --p-bg:#fff; --p-serv:1px solid #d8d4ca; --p-vari:0 18px 40px rgba(28,39,51,.22); --p-varv:#1c2733; --h-bg:#f2f0ea; --h-varv:#1c2733; --m-kaal:500;
+  .menyy { --m-varv:#dfe8f4; --m-bg:linear-gradient(180deg, rgba(150,175,210,.24), rgba(40,55,80,.4)); --m-serv:1px solid rgba(190,210,240,.28);
+    --m-vari:inset 0 1px 0 rgba(255,255,255,.25), 0 8px 24px rgba(0,0,0,.45); --m-h-bg:linear-gradient(180deg, rgba(185,205,235,.36), rgba(52,70,100,.5)); --m-h-varv:#fff;
+    --p-bg:rgba(14,21,33,.97); --p-serv:1px solid rgba(170,195,230,.22); --p-vari:0 24px 60px rgba(0,0,0,.65); --p-varv:#d5dfec; --h-bg:rgba(159,196,238,.16); --h-varv:#fff; --m-kaal:500;
     position: fixed; top: 14px; left: 14px; z-index: 2000;
     font: var(--m-kaal) .92rem/1 "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; letter-spacing: .01em; }
   .menyy.parem { left: auto; right: 14px; }
@@ -65,7 +106,6 @@ td.below { color:#a0a0a0 !important; text-decoration:line-through; }
   .menyy .menyy-paneel a[aria-current] { font-weight: 700; box-shadow: inset 3px 0 0 currentColor; }
   @media print { .menyy { display: none !important; } }
   .menyy.parem { top: 9px; right: 12px; }
-  body > header { padding-right: 150px !important; }
 </style>
 </head>
 <body>
@@ -84,16 +124,16 @@ td.below { color:#a0a0a0 !important; text-decoration:line-through; }
   </div></div>
 </div>
 <header>
-  <h1>Päikesevarjutused 2026–2126</h1>
+  <h1>Päikesevarjutused <span id="aastad">2026–2126</span></h1>
   <p>Vali varjutus, klõpsa kaardil — näed kohalikke tingimusi. Kuldne täht = suurima varjutuse punkt.</p>
 </header>
 <main>
   <div id="map"></div>
   <aside>
     <div>
-      <label class="field" for="pick">Varjutus (227 tk)</label>
+      <label class="field" for="pick">Varjutus (<span id="koikArv">227</span> tk)</label>
       <select id="pick"></select>
-      <label class="chk" style="margin-top:6px;"><input type="checkbox" id="eeOnly"> ainult Eestis nähtavad (32 tk)</label>
+      <label class="chk" style="margin-top:6px;"><input type="checkbox" id="eeOnly"> <span>ainult Eestis nähtavad (<b id="eeArv" style="font-weight:inherit">32</b> tk)</span></label>
     </div>
     <div class="stat">
       <div class="k">Globaalselt</div>
@@ -132,8 +172,8 @@ td.below { color:#a0a0a0 !important; text-decoration:line-through; }
     </div>
     <div class="coords" id="coords">–</div>
     <div class="legend">
-      <div><span style="background:#2b2140; opacity:0.55;"></span>Täisvari (täielik varjutus)</div>
-      <div><span style="background:#b8860b; opacity:0.55;"></span>Rõngasvari (rõngakujuline)</div>
+      <div><span style="background:#cfe0f7; opacity:0.55;"></span>Täisvari (täielik varjutus)</div>
+      <div><span style="background:#e3b341; opacity:0.55;"></span>Rõngasvari (rõngakujuline)</div>
       <div><span style="background:transparent; border:2px dashed #d85a30; height:8px;"></span>Poolvari (osaline varjutus, päike horisondi kohal)</div>
     </div>
     <div class="safety"><strong>Silmade ohutus:</strong> ära vaata otse päikesesse ilma sertifitseeritud varjutusprillideta (ISO 12312-2). Tavalised päikeseprillid ei kaitse. Optika ette ainult objektiivipoolne päikesefilter.</div>
@@ -152,11 +192,14 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 const pick = document.getElementById('pick');
+// toimunud varjutusi ei näidata (üks päev varuks, et sama päeva varjutus ei kaoks)
+const TULEVIK = c => new Date(c.peak).getTime() + 864e5 > Date.now();
 const eeOnly = document.getElementById('eeOnly');
 function fillPick() {
   const cur = pick.value;
   pick.innerHTML = '';
   CATALOG.forEach((c, i) => {
+    if (!TULEVIK(c)) return;
     if (eeOnly.checked && !(c.ee > 0.005)) return;
     const d = c.peak.slice(8,10) + '.' + c.peak.slice(5,7) + '.' + c.peak.slice(0,4);
     const ee = c.ee > 0.005 ? (' · Eestis ' + Math.round(c.ee*100) + '%') : '';
@@ -168,6 +211,16 @@ function fillPick() {
   if ([...pick.options].some(o => o.value === cur)) pick.value = cur;
 }
 fillPick();
+(function () {
+  const jaanud = CATALOG.filter(TULEVIK);
+  document.getElementById('koikArv').textContent = jaanud.length;
+  document.getElementById('eeArv').textContent = jaanud.filter(c => c.ee > 0.005).length;
+  if (jaanud.length) {
+    const aastad = jaanud[0].peak.slice(0, 4) + '–' + jaanud[jaanud.length - 1].peak.slice(0, 4);
+    document.getElementById('aastad').textContent = aastad;
+    document.title = 'Päikesevarjutused ' + aastad;
+  }
+})();
 eeOnly.addEventListener('change', () => { fillPick(); onPick(); });
 
 let marker = null, peakMark = null, curLat = 58.2528, curLon = 22.4869;
@@ -196,7 +249,7 @@ function sunEvent(direction, searchBack) {
 }
 function dirLabel(pos, color, text) {
   return L.marker(pos, { interactive: false, icon: L.divIcon({ className: '',
-    html: '<div style="font: 500 12px Archivo, sans-serif; color:' + color + '; text-shadow: 0 0 3px #fff, 0 0 3px #fff; white-space: nowrap;">' + text + '</div>',
+    html: '<div style="font: 500 12px Archivo, sans-serif; color:' + color + '; text-shadow: 0 0 3px #04060b, 0 0 3px #04060b; white-space: nowrap;">' + text + '</div>',
     iconSize: [160, 16], iconAnchor: [0, 8] }) });
 }
 function drawSunDirs() {
@@ -205,15 +258,15 @@ function drawSunDirs() {
   if (riseOn) {
     const r = sunEvent(+1, true);
     if (r) {
-      dirLayers.push(L.polyline([[curLat, curLon], dest(curLat, curLon, r.az, 40)], { color: '#b8860b', weight: 3, dashArray: '6 6' }).addTo(map));
-      dirLayers.push(dirLabel(dest(curLat, curLon, r.az, 46), '#7a5a08', 'tõus ' + Math.round(r.az) + '° kell ' + fmtT(r.time)).addTo(map));
+      dirLayers.push(L.polyline([[curLat, curLon], dest(curLat, curLon, r.az, 40)], { color: '#e3b341', weight: 3, dashArray: '6 6' }).addTo(map));
+      dirLayers.push(dirLabel(dest(curLat, curLon, r.az, 46), '#f0cd6a', 'tõus ' + Math.round(r.az) + '° kell ' + fmtT(r.time)).addTo(map));
     }
   }
   if (setOn) {
     const s = sunEvent(-1, false);
     if (s) {
       dirLayers.push(L.polyline([[curLat, curLon], dest(curLat, curLon, s.az, 40)], { color: '#d85a30', weight: 3, dashArray: '6 6' }).addTo(map));
-      dirLayers.push(dirLabel(dest(curLat, curLon, s.az, 46), '#993c1d', 'loojang ' + Math.round(s.az) + '° kell ' + fmtT(s.time)).addTo(map));
+      dirLayers.push(dirLabel(dest(curLat, curLon, s.az, 46), '#ffa27e', 'loojang ' + Math.round(s.az) + '° kell ' + fmtT(s.time)).addTo(map));
     }
   }
 }
@@ -223,11 +276,11 @@ const DirCtl = L.Control.extend({ options: { position: 'topleft' }, onAdd() {
   const mk = (label, get, set) => {
     const b = L.DomUtil.create('button', '', box);
     b.textContent = label;
-    b.style.cssText = 'background:#fff; border:2px solid rgba(0,0,0,0.25); border-radius:4px; padding:6px 10px; font:500 12px Archivo,sans-serif; cursor:pointer; text-align:left;';
+    b.style.cssText = 'background:#141d2c; color:#dfe8f4; border:1px solid rgba(190,210,240,.3); border-radius:999px; padding:7px 12px; font:500 12px "Segoe UI",system-ui,sans-serif; cursor:pointer; text-align:left; box-shadow:0 6px 18px rgba(0,0,0,.4);';
     L.DomEvent.on(b, 'click', e => {
       L.DomEvent.stop(e);
       set(!get());
-      b.style.background = get() ? '#fde3d8' : '#fff';
+      b.style.background = get() ? '#3f5a82' : '#141d2c';
       drawSunDirs();
     });
   };
@@ -247,7 +300,7 @@ function drawShadows() {
     shadowLayers.push(L.polygon(ring, { color:'#d85a30', weight:2, dashArray:'6 5', opacity:0.75,
       fill:false, interactive:false }).addTo(map));
   if (s.u && s.u.polys) {
-    const col = c.kind === 'annular' ? '#b8860b' : '#2b2140';
+    const col = c.kind === 'annular' ? '#e3b341' : '#cfe0f7';
     for (const ring of s.u.polys)
       shadowLayers.push(L.polygon(ring,
         { color:col, weight:1, fillColor:col, fillOpacity:0.32, interactive:false }).addTo(map));
@@ -286,7 +339,7 @@ function onPick() {
   if (peakMark) { map.removeLayer(peakMark); peakMark = null; }
   if (c.lat != null) {
     peakMark = L.marker([c.lat, c.lon], { interactive:false, icon: L.divIcon({ className:'',
-      html:'<div style="font-size:22px; line-height:22px; color:#d4a017; text-shadow:0 0 3px #fff, 0 0 3px #fff;">★</div>', iconSize:[22,22], iconAnchor:[11,11] }) }).addTo(map);
+      html:'<div style="font-size:22px; line-height:22px; color:#f0cd6a; text-shadow:0 0 4px #04060b, 0 0 4px #04060b;">★</div>', iconSize:[22,22], iconAnchor:[11,11] }) }).addTo(map);
   }
   compute();
 }
@@ -443,7 +496,7 @@ function show(lat, lon) {
 }
 map.on('click', e => show(e.latlng.lat, e.latlng.lng));
 pick.addEventListener('change', onPick);
-pick.value = 0;
+pick.selectedIndex = 0;
 onPick();
 show(58.2528, 22.4869);
 window.refreshTimes = () => { compute(); drawSunDirs(); };
