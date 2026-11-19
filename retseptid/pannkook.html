@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lihtsate ülepanni pannkookide kalkulaator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .portion-input {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 2px dashed #dee2e6;
+        }
+
+        .portion-input label {
+            display: block;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .portion-input input {
+            font-size: 2em;
+            padding: 15px;
+            border: 3px solid #fdcb6e;
+            border-radius: 8px;
+            width: 200px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .portion-input input:focus {
+            outline: none;
+            border-color: #fd79a8;
+            box-shadow: 0 0 20px rgba(253, 121, 168, 0.3);
+        }
+
+        .portion-input span {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #fdcb6e;
+            margin-left: 10px;
+        }
+
+        .recipe-table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .recipe-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .recipe-table th {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 20px;
+            font-size: 1.1em;
+            text-align: left;
+        }
+
+        .recipe-table td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .recipe-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .ingredient {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .amount {
+            font-size: 1.1em;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .instructions {
+            background: #e8f5e8;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #27ae60;
+        }
+
+        .instructions h3 {
+            color: #27ae60;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .cooking-tips {
+            background: #fff3cd;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #ffc107;
+        }
+
+        .cooking-tips h3 {
+            color: #856404;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .tip-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ffeaa7;
+        }
+
+        .tip-item h4 {
+            color: #d68910;
+            margin-bottom: 5px;
+        }
+
+        .tips {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 25px;
+            border-left: 5px solid #2196f3;
+        }
+
+        .tips h3 {
+            color: #1976d2;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .tips ul {
+            margin-left: 20px;
+        }
+
+        .tips li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .variations {
+            background: #f3e5f5;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 25px;
+            border-left: 5px solid #9c27b0;
+        }
+
+        .variations h3 {
+            color: #7b1fa2;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .variations ul {
+            margin-left: 20px;
+        }
+
+        .variations li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .portion-input input {
+                width: 150px;
+                font-size: 1.5em;
+            }
+            
+            .recipe-table th,
+            .recipe-table td {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+
+<style id="tuuning">
+/* Ühtne tume teraskujundus (sama mis avalehel). Trükivaadet ei muudeta. */
+@media screen {
+  html body {
+    background: #04060b radial-gradient(120% 85% at 50% 0%, #17243a 0%, #080d16 52%, #04060b 100%) fixed !important;
+    color: #d5dfec !important;
+    font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif !important;
+  }
+  body .container, body > .controls, body .container > .controls {
+    background: linear-gradient(165deg, #141d2c, #0a0f19) !important;
+    border: 1px solid rgba(170,195,230,.16) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 30px 80px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.07) !important;
+    color: #d5dfec !important;
+  }
+  body .container > .controls { box-shadow: none !important; border: 0 !important; background: transparent !important; }
+  body .header {
+    background: linear-gradient(180deg, #223149, #111a29) !important;
+    border-bottom: 1px solid rgba(170,195,230,.16) !important;
+    color: #eef4fb !important;
+  }
+  body h1, body h2 { color: #eef4fb !important; text-shadow: none !important; font-weight: 600 !important; letter-spacing: -.01em; }
+  body .header p, body .controls > p { color: #9db0c8 !important; opacity: 1 !important; }
+  body .weight-input, body .portion-input, body .weight-selector, body .instructions, body .timing, body .cooking,
+  body .tips, body .vinegar-choice, body .cooking-tips, body .variations, body .adjustments, body .info,
+  body .recipe-table, body .ingredients, body .calculator {
+    background: rgba(255,255,255,.035) !important;
+    border: 1px solid rgba(170,195,230,.13) !important;
+    border-left: 3px solid #7f9cc0 !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    color: #d5dfec !important;
+  }
+  body .calculator, body .ingredients { background: transparent !important; border: 0 !important; }
+  body .weight-selector .weight-input { background: transparent !important; border: 0 !important; }
+  body h3, body h4, body label, body strong, body .ingredient, body .ingredient-name, body .ingredient-header { color: #eaf1fa !important; }
+  body .amount, body .ingredient-amount, body .weight-input span, body .portion-input span { color: #9fc4ee !important; }
+  body table th { background: #1b273a !important; color: #cfdcec !important; }
+  body table td { border-bottom-color: rgba(170,195,230,.1) !important; color: #d5dfec !important; }
+  body table tr:hover { background: rgba(255,255,255,.04) !important; }
+  body [class$="-item"], body .ingredient-row, body .ingredient-card {
+    background: rgba(255,255,255,.045) !important;
+    border: 1px solid rgba(170,195,230,.13) !important;
+    color: #d5dfec !important;
+    box-shadow: none !important;
+  }
+  body li, body p, body td, body span { color: inherit; }
+  /* koostisosade kaardid (šašlõkimarinaad) */
+  body div.ingredient {
+    background: rgba(255,255,255,.045) !important;
+    border: 1px solid rgba(170,195,230,.13) !important;
+    border-left: 3px solid #7f9cc0 !important;
+    border-radius: 12px !important; box-shadow: none !important; transform: none !important;
+  }
+  body div.ingredient::before { display: none !important; }
+  body div.ingredient .ingredient-amount {
+    background: rgba(159,196,238,.1) !important; border: 1px solid rgba(159,196,238,.35) !important; color: #b9d5f5 !important;
+  }
+  body div.ingredient .ingredient-notes { color: #9db0c8 !important; }
+  body div.ingredient.special-note { background: rgba(240,180,90,.08) !important; border-color: rgba(240,180,90,.4) !important; border-left-color: #f0b45a !important; }
+  body div.ingredient .warning-text { color: #f6c57e !important; }
+  body #fileInfo { border: 0 !important; background: transparent !important; color: #9db0c8 !important; padding-left: 0 !important; }
+  body input[type=number], body input[type=text], body select {
+    background: #0a0f18 !important; color: #eef4fb !important;
+    border: 1px solid rgba(170,195,230,.32) !important; border-radius: 10px !important;
+  }
+  body input:focus, body select:focus { border-color: #9fc4ee !important; box-shadow: 0 0 0 3px rgba(159,196,238,.22) !important; outline: none !important; }
+  body input[type=file] { color: #9db0c8 !important; }
+  body button, body .btn {
+    background: linear-gradient(180deg, #2c3d57, #182336) !important;
+    color: #eef4fb !important;
+    border: 1px solid rgba(180,205,240,.3) !important;
+    border-radius: 999px !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 6px 18px rgba(0,0,0,.35) !important;
+    text-shadow: none !important;
+  }
+  body button:hover:not(:disabled), body .btn:hover:not(:disabled) { background: linear-gradient(180deg, #41587a, #22324b) !important; transform: none !important; }
+  body button:disabled { opacity: .45 !important; cursor: not-allowed; }
+  body :focus-visible { outline: 2px solid #9fc4ee; outline-offset: 2px; }
+  .tagasi {
+    position: fixed; top: 14px; left: 14px; z-index: 50;
+    font: 500 .9rem/1 "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; color: #dfe8f4; text-decoration: none;
+    padding: .65rem 1.05rem; border-radius: 999px;
+    background: linear-gradient(180deg, rgba(150,175,210,.24), rgba(40,55,80,.4));
+    border: 1px solid rgba(190,210,240,.28);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 8px 24px rgba(0,0,0,.45);
+  }
+  .tagasi:hover { color: #fff; border-color: rgba(210,228,250,.55); }
+  body { padding-top: 64px !important; }
+}
+@media print { .tagasi { display: none !important; } }
+</style>
+</head>
+<body>
+<a class="tagasi" href="../">Avaleht</a>
+    <div class="container">
+        <div class="header">
+            <h1>🥞 Lihtsad ülepanni pannkoogid</h1>
+            <p>Klassikaline retsept</p>
+        </div>
+        
+        <div class="content">
+            <div class="portion-input">
+                <label for="pancakeCount">Pannkookide arv:</label>
+                <input type="number" id="pancakeCount" value="6" min="1" step="1" onchange="calculateIngredients()">
+                <span>tk</span>
+            </div>
+
+            <div class="recipe-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Koostisosa</th>
+                            <th>Kogus</th>
+                            <th>Märkused</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ingredientsTable">
+                        <tr>
+                            <td class="ingredient">Munad</td>
+                            <td class="amount" id="eggs">2 tk</td>
+                            <td>Toatemp.</td>
+                        </tr>
+                        <tr>
+                            <td class="ingredient">Vesi</td>
+                            <td class="amount" id="water">500 ml</td>
+                            <td>Toatemp.</td>
+                        </tr>
+                        <tr>
+                            <td class="ingredient">Jahu</td>
+                            <td class="amount" id="flour">250 g (9 sl)</td>
+                            <td>Nisujahu<br>(spl-kuhjaga)</td>
+                        </tr>
+                        <tr>
+                            <td class="ingredient">Sool</td>
+                            <td class="amount" id="salt">0,5 tl</td>
+                            <td>Maitse jaoks</td>
+                        </tr>
+                        <tr>
+                            <td class="ingredient">Suhkur</td>
+                            <td class="amount" id="sugar">1-2 sl</td>
+                            <td>Valikuline, magusamate jaoks</td>
+                        </tr>
+                        <tr>
+                            <td class="ingredient">Õli/sulavõi</td>
+                            <td class="amount" id="oil">2 sl</td>
+                            <td>Taigna sisse</td>
+                        </tr>
+                        <tr>
+                            <td class="ingredient">Praadimiseks</td>
+                            <td class="amount">Õli või või</td>
+                            <td>Panni määrimiseks</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="instructions">
+                <h3>🔧 Valmistamise juhised</h3>
+                <ol>
+                    <li><strong>Klopi munad lahti:</strong> Klopi munad kausis lahti</li>
+                    <li><strong>Lisa vesi:</strong> Lisa vesi ning sega ühtlaseks</li>
+                    <li><strong>Lisa kuivained:</strong> Lisa jahu, sool ja (soovi korral) suhkur</li>
+                    <li><strong>Vispelda ühtlaseks:</strong> Vispelda ühtlaseks tainaks, ilma tükkideta</li>
+                    <li><strong>Lisa õli:</strong> Lisa õli või sulavõi ja sega veelkord</li>
+                    <li><strong>Lase seista:</strong> Lase tainal seista 10–15 minutit (valikuline, aga aitab paremini paisuda)</li>
+                    <li><strong>Kuumuta pann:</strong> Kuumuta pann, lisa veidi õli või võid</li>
+                    <li><strong>Vala tainas:</strong> Vala kulbitäis tainast pannile, kalluta panni, et tainas jaotuks ühtlaselt</li>
+                    <li><strong>Küpseta:</strong> Küpseta keskmisel kuumusel mõlemalt poolt kuldpruuniks</li>
+                </ol>
+            </div>
+
+            <div class="cooking-tips">
+                <h3>🔥 Küpsetamise nõuanded</h3>
+                <div class="tips-grid">
+                    <div class="tip-item">
+                        <h4>Õige panni kuumus</h4>
+                        <p>Pann peab olema piisavalt kuum, et tainas kohe sahisema hakkaks, aga mitte liiga kuum.</p>
+                    </div>
+                    <div class="tip-item">
+                        <h4>Ühtlane jaotus</h4>
+                        <p>Kalluta panni ringikujuliselt, et tainas jaotuks võimalikult õhukeselt ja ühtlaselt.</p>
+                    </div>
+                    <div class="tip-item">
+                        <h4>Pööramine</h4>
+                        <p>Pööra pannkook ümber, kui servad hakkavad kergelt pruuniks muutuma.</p>
+                    </div>
+                    <div class="tip-item">
+                        <h4>Soojana hoidmine</h4>
+                        <p>Kuhja valmis pannkoogid taldrikule ja hoia soojas kuni serveerimiseni.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tips">
+                <h3>💡 Professionaalsed nipid</h3>
+                <ul>
+                    <li><strong>Sile taigen:</strong> Kui tekivad tükid, sõeluge taigen läbi või kasutage käsimikserit</li>
+                    <li><strong>Õige konsistents:</strong> Taigen peaks olema nagu vedel koor - mitte liiga paks ega liiga vedel</li>
+                    <li><strong>Esimene pannkook:</strong> Esimene pannkook läheb tavaliselt "katse" peale - see on täiesti normaalne</li>
+                    <li><strong>Puhkepaus:</strong> 10-15 minutit oodata aitab jahul paremini paisuda</li>
+                    <li><strong>Kulp või kauslabidas:</strong> Kasutage alati sama kauslabida, et pannkoogid oleks ühesuurused</li>
+                    <li><strong>Panni hooldus:</strong> Kui pann hakkab kleepuma, pühkige kuiva paberrätikuga ja lisage uus õlikilekene</li>
+                </ul>
+            </div>
+
+            <div class="variations">
+                <h3>🎯 Variandid ja täiendused</h3>
+                <ul>
+                    <li><strong>Magusamad:</strong> Lisa rohkem suhkrut või vaniljesuhkrut</li>
+                    <li><strong>Soolased:</strong> Jäta suhkur ära, lisa ürdid või juust</li>
+                    <li><strong>Marjadega:</strong> Lisa värskeid marju taigna sekka</li>
+                    <li><strong>Täisterajahu:</strong> Asenda osa nisujahu täisterajahuga</li>
+                    <li><strong>Maitseained:</strong> Lisa vaniljesuhkur, sidrunikoor või kaneel</li>
+                    <li><strong>Serveerimiseks:</strong> Mesi, moos, värske või, jäätis, marjad</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateIngredients() {
+            const pancakeCount = parseInt(document.getElementById('pancakeCount').value);
+            
+            if (pancakeCount <= 0) {
+                return;
+            }
+
+            // Base amounts for 6 pancakes (average of 5-6)
+            const baseAmounts = {
+                eggs: 2,         // pieces
+                water: 500,      // ml
+                flour: 250,      // g
+                salt: 0.5,       // tl
+                sugar: 1.5,      // sl (average of 1-2)
+                oil: 2           // sl
+            };
+
+            // Calculate new amounts
+            const multiplier = pancakeCount / 6;
+            const newAmounts = {
+                eggs: Math.round(baseAmounts.eggs * multiplier),
+                water: Math.round(baseAmounts.water * multiplier),
+                flour: Math.round(baseAmounts.flour * multiplier),
+                flourDl: Math.round(baseAmounts.flour * multiplier * 0.037), // 1g jahu ≈ 0.016 dl
+                salt: (baseAmounts.salt * multiplier).toFixed(1),
+                sugar: (baseAmounts.sugar * multiplier).toFixed(1),
+                oil: (baseAmounts.oil * multiplier).toFixed(1)
+            };
+
+            // Update table
+            document.getElementById('eggs').textContent = newAmounts.eggs + ' tk';
+            document.getElementById('water').textContent = newAmounts.water + ' ml';
+            document.getElementById('flour').textContent = newAmounts.flour + ' g (' + newAmounts.flourDl + ' sl)';
+            document.getElementById('salt').textContent = newAmounts.salt + ' tl';
+            document.getElementById('sugar').textContent = newAmounts.sugar + ' sl';
+            document.getElementById('oil').textContent = newAmounts.oil + ' sl';
+        }
+
+        // Initialize with default values
+        calculateIngredients();
+    </script>
+</body>
+</html>
