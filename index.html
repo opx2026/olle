@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>∿</title>
+<meta name="theme-color" content="#04060b">
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #04060b; }
+  /* varuvariant, kui WebGL puudub */
+  body { background: radial-gradient(circle at 50% 50%, #1a2233 0%, #0a0e17 45%, #04060b 75%); }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  #nupud {
+    position: fixed; z-index: 2; left: 0; right: 0; bottom: clamp(1rem, 4vh, 2.5rem);
+    display: flex; flex-wrap: wrap; justify-content: center; gap: .6rem;
+    padding: 0 1rem; margin: 0 auto; max-width: 62rem;
+  }
+  #nupud a {
+    font: 500 .95rem/1 "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: .02em; color: #d3deec; text-decoration: none; white-space: nowrap;
+    padding: .8rem 1.3rem; border-radius: 999px;
+    background: linear-gradient(180deg, rgba(150,175,210,.20), rgba(34,48,72,.34));
+    border: 1px solid rgba(190,210,240,.24);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.24), inset 0 -1px 0 rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.5);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    transition: color .15s, border-color .15s, background .15s;
+  }
+  #nupud a:hover, #nupud a:focus-visible {
+    color: #fff; border-color: rgba(215,230,250,.6);
+    background: linear-gradient(180deg, rgba(185,205,235,.34), rgba(52,70,100,.44));
+  }
+  #nupud a:focus-visible { outline: 2px solid #9fc4ee; outline-offset: 3px; }
+  @media (max-width: 560px) { #nupud a { font-size: .88rem; padding: .7rem 1rem; } }
+</style>
+</head>
+<body>
+<!--
+  UUE NUPU LISAMINE: pane alamleht siia samasse sait\ kausta, lisa allpool üks <a> rida
+  ja topeltklõpsa github-push.bat.
+-->
+<canvas id="c" aria-hidden="true"></canvas>
+<nav id="nupud" aria-label="Lehed">
+  <a href="kell/">Kell</a>
+  <a href="QR/">QR-kood</a>
+  <a href="collage/">Kollaaž</a>
+  <a href="collage2/">Kollaaž 2</a>
+  <a href="retseptid/kana.html">Kana</a>
+  <a href="retseptid/sealiha.html">Sealiha</a>
+  <a href="retseptid/sauda.html">Šašlõkk</a>
+  <a href="retseptid/pannkook.html">Pannkoogid</a>
+</nav>
+
+<script id="fs" type="x-shader/x-fragment">
+precision highp float;
+uniform vec2  uRes;
+uniform float uT;
+uniform vec3  uM;      // kursori asukoht ruumis (xy) ja tugevus (z)
+uniform float uPulss;  // klõpsu järel sumbuv lainetus
+uniform vec2  uVaade;  // kaamera kerge kõikumine kursori järgi
+
+float smin(float a, float b, float k) {
+  float h = clamp(.5 + .5 * (b - a) / k, 0., 1.);
+  return mix(b, a, h) - k * h * (1. - h);
+}
+vec3 tilk(float i) {
+  float a = i * 2.4;
+  return vec3(sin(uT * .50 * (.6 + .13 * i) + a) * 1.05,
+              cos(uT * .43 * (.7 + .11 * i) + a * 1.7) * .78,
+              sin(uT * .37 * (.8 + .09 * i) + a * .6) * .65);
+}
+float kaart(vec3 p) {
+  float d = length(p) - .72;
+  for (int i = 1; i <= 5; i++) {
+    float fi = float(i);
+    d = smin(d, length(p - tilk(fi)) - (.33 + .07 * sin(fi * 5.)), .55);
+  }
+  // kursor tõmbab vedelikust ühe tilga enda poole
+  d = smin(d, length(p - vec3(uM.xy, .25)) - .30 * uM.z, .65);
+  // pinna voolav lainetus
+  float l = sin(p.x * 3.1 + uT * 1.10) * sin(p.y * 3.5 - uT * .90) * sin(p.z * 2.9 + uT * .70);
+  l += .5 * sin(p.x * 6.3 - uT * 1.6) * sin(p.y * 5.7 + uT * 1.3) * sin(p.z * 6.1 - uT);
+  d += l * (.055 + .075 * uPulss);
+  return d * .75;
+}
+vec3 normaal(vec3 p) {
+  vec2 e = vec2(.0025, -.0025);
+  return normalize(e.xyy * kaart(p + e.xyy) + e.yyx * kaart(p + e.yyx) +
+                   e.yxy * kaart(p + e.yxy) + e.xxx * kaart(p + e.xxx));
+}
+// stuudio, mida metall peegeldab: pehmete servadega valgustid, et üleminekud oleksid sujuvad
+float ymbrus(vec3 r) {
+  float ca = cos(uT * .07), sa = sin(uT * .07);
+  r.xz = mat2(ca, -sa, sa, ca) * r.xz;                 // ruum pöörleb aeglaselt, peegeldused liiguvad
+  float az = atan(r.x, r.z);
+  float v = mix(.03, .34, smoothstep(-.6, 1., r.y));   // üldine helendus ülalt
+  // laevalgusti: hele keskelt, hajub servade poole
+  vec2 q = r.xz / max(r.y, .001);
+  float lagi = step(0., r.y) * smoothstep(1.5, .35, abs(q.x)) * smoothstep(.95, .12, abs(q.y - .15));
+  v += lagi * lagi * 1.25;
+  // püstised valgusribad
+  float korgus = smoothstep(1., .15, abs(r.y - .05));
+  float r1 = smoothstep(.42, .0, abs(az - 1.75));
+  float r2 = smoothstep(.32, .0, abs(az + 2.05));
+  float r3 = smoothstep(.20, .0, abs(az + .55));
+  v += (r1 * r1 * .95 + r2 * r2 * .65 + r3 * r3 * .38) * korgus;
+  // horisondi kuma ja tumedam põrand
+  v += smoothstep(.22, .0, abs(r.y + .12)) * .16;
+  v *= mix(.42, 1., smoothstep(-.75, .0, r.y));
+  return v;
+}
+float juhus(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+void main() {
+  vec2 uv = (gl_FragCoord.xy - .5 * uRes) / min(uRes.x, uRes.y);
+  vec3 ro = vec3(uVaade * .55, 3.7);
+  vec3 siht = vec3(0.);
+  vec3 ett = normalize(siht - ro);
+  vec3 par = normalize(cross(ett, vec3(0., 1., 0.)));
+  vec3 yl = cross(par, ett);
+  vec3 rd = normalize(ett * 1.55 + par * uv.x + yl * uv.y);
+
+  float t = 1.2, md = 10.;
+  bool tabas = false;
+  for (int i = 0; i < 72; i++) {
+    float d = kaart(ro + rd * t);
+    md = min(md, d);
+    if (d < .002) { tabas = true; break; }
+    t += d;
+    if (t > 7.5) break;
+  }
+
+  // taust: tumesinine ruum, vedeliku taga õrn kuma
+  float kaugus = length(uv);
+  float v = mix(.0055, .0012, smoothstep(.0, 1.1, kaugus));
+  v += exp(-max(md, 0.) * 5.) * .012;
+
+  if (tabas) {
+    vec3 p = ro + rd * t;
+    vec3 n = normaal(p);
+    float nv = max(dot(n, -rd), 0.);
+    float fr = pow(1. - nv, 3.);
+    vec3 r = reflect(rd, n);
+    v = ymbrus(r) * mix(.80, 1.10, fr);                 // poleeritud metall: peegeldab kõikjal, servades veidi rohkem
+    float ao = clamp(kaart(p + n * .3) / .3, 0., 1.);   // tilkade vahed jäävad tumedamaks
+    v *= .45 + .55 * ao;
+  }
+
+  v = 1. - exp(-v * 1.15);                  // pehme toonikaardistus: valgus ei põle valgeks
+  v = pow(v, .4545);
+  v *= 1. - .35 * smoothstep(.55, 1.4, kaugus);
+  // ühevärviline sinakas teras: varjud tumesinised, heledad kohad jaheda tooniga, mitte puhas valge
+  vec3 col = pow(vec3(v), vec3(1.42, 1.14, .88)) * vec3(.84, .90, .97);
+  // peen müra peidab 8-bitise värvi astmed (muidu jäävad sujuvatesse üleminekutesse triibud)
+  float m = juhus(gl_FragCoord.xy) + juhus(gl_FragCoord.xy + 17.31) - 1.;
+  col += m * (1.6 / 255.);
+  gl_FragColor = vec4(col, 1.);
+}
+</script>
+
+<script>
+(function () {
+  var c = document.getElementById('c');
+  var gl = c.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'high-performance' });
+  if (!gl) { c.remove(); return; }
+  var rahulik = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function varjutaja(liik, kood) {
+    var s = gl.createShader(liik);
+    gl.shaderSource(s, kood); gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { console.error(gl.getShaderInfoLog(s)); return null; }
+    return s;
+  }
+  var vs = varjutaja(gl.VERTEX_SHADER, 'attribute vec2 a; void main(){ gl_Position = vec4(a, 0., 1.); }');
+  var fs = varjutaja(gl.FRAGMENT_SHADER, document.getElementById('fs').textContent);
+  if (!vs || !fs) { c.remove(); return; }
+  var pr = gl.createProgram();
+  gl.attachShader(pr, vs); gl.attachShader(pr, fs); gl.linkProgram(pr);
+  if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) { console.error(gl.getProgramInfoLog(pr)); c.remove(); return; }
+  gl.useProgram(pr);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  var a = gl.getAttribLocation(pr, 'a');
+  gl.enableVertexAttribArray(a); gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
+  var uRes = gl.getUniformLocation(pr, 'uRes'), uT = gl.getUniformLocation(pr, 'uT'),
+      uM = gl.getUniformLocation(pr, 'uM'), uPulss = gl.getUniformLocation(pr, 'uPulss'),
+      uVaade = gl.getUniformLocation(pr, 'uVaade');
+
+  var skaala = Math.min(window.devicePixelRatio || 1, 1.5);   // joonistustihedus, kohandub kiiruse järgi
+  var W = 0, H = 0;
+  function moodud() {
+    W = window.innerWidth; H = window.innerHeight;
+    c.width = Math.max(2, Math.round(W * skaala)); c.height = Math.max(2, Math.round(H * skaala));
+    gl.viewport(0, 0, c.width, c.height);
+  }
+
+  var hiir = { x: 0, y: 0, sx: 0, sy: 0, j: 0, sj: 0 };   // ruumikoordinaadid, j = tugevus
+  var vaade = { x: 0, y: 0 }, pulss = 0;
+  var aeg = 12.0, paus = false;                           // klõps (või tühik) peatab ja käivitab liikumise
+  var algus = performance.now(), eelmine = algus, aeglane = 0, kaader = 0, nahtav = true;
+
+  function ruumi(e) {
+    var m = Math.min(W, H);
+    // ekraanipunkt -> punkt tasandil z = 0.25 kaamera ees (kaamera kaugus 3.7, fookus 1.55)
+    var k = (3.7 - .25) / 1.55;
+    hiir.sx = (e.clientX - W / 2) / m * k;
+    hiir.sy = -(e.clientY - H / 2) / m * k;
+  }
+
+  function joonista(praegu) {
+    kaader = 0;
+    var dt = praegu - eelmine; eelmine = praegu;
+    if (dt > 30 && dt < 500) { if (++aeglane > 25 && skaala > .45) { skaala *= .8; aeglane = 0; moodud(); } }
+    else if (aeglane > 0) aeglane--;
+
+    hiir.x += (hiir.sx - hiir.x) * .07; hiir.y += (hiir.sy - hiir.y) * .07;
+    hiir.j += (hiir.sj - hiir.j) * .06;
+    vaade.x += (hiir.sx * .35 * hiir.sj - vaade.x) * .03;
+    vaade.y += (hiir.sy * .35 * hiir.sj - vaade.y) * .03;
+    pulss *= .955;
+    aeg += Math.min(dt, 100) / 1000;
+
+    gl.uniform2f(uRes, c.width, c.height);
+    gl.uniform1f(uT, rahulik ? 12.0 : aeg);
+    gl.uniform3f(uM, hiir.x, hiir.y, hiir.j);
+    gl.uniform1f(uPulss, pulss);
+    gl.uniform2f(uVaade, vaade.x, vaade.y);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+    var liigub = hiir.j > .01 || hiir.sj > 0 || pulss > .01;
+    if (nahtav && !paus && (!rahulik || liigub)) kaader = requestAnimationFrame(joonista);
+  }
+  function kaivita() { if (!kaader && nahtav && !paus) { eelmine = performance.now(); kaader = requestAnimationFrame(joonista); } }
+
+  window.addEventListener('pointermove', function (e) { ruumi(e); hiir.sj = 1; kaivita(); });
+  function lyliti() { paus = !paus; kaivita(); }
+  window.addEventListener('pointerdown', function (e) { if (e.button || e.target.closest('#nupud')) return; ruumi(e); lyliti(); });
+  window.addEventListener('keydown', function (e) { if (e.code === 'Space') { e.preventDefault(); lyliti(); } });
+  window.addEventListener('pointerup', function (e) { if (e.pointerType !== 'mouse') hiir.sj = 0; });
+  document.addEventListener('pointerleave', function () { hiir.sj = 0; });
+  window.addEventListener('resize', function () {
+    moodud();
+    if (paus) { paus = false; eelmine = performance.now(); joonista(eelmine); paus = true; if (kaader) { cancelAnimationFrame(kaader); kaader = 0; } }
+    else kaivita();
+  });
+  document.addEventListener('visibilitychange', function () { nahtav = !document.hidden; kaivita(); });
+
+  moodud();
+  kaivita();
+})();
+</script>
+</body>
+</html>
