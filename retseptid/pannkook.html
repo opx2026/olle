@@ -332,22 +332,49 @@
   body button:hover:not(:disabled), body .btn:hover:not(:disabled) { background: linear-gradient(180deg, #41587a, #22324b) !important; transform: none !important; }
   body button:disabled { opacity: .45 !important; cursor: not-allowed; }
   body :focus-visible { outline: 2px solid #9fc4ee; outline-offset: 2px; }
-  .tagasi {
-    position: fixed; top: 14px; left: 14px; z-index: 50;
-    font: 500 .9rem/1 "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; color: #dfe8f4; text-decoration: none;
-    padding: .65rem 1.05rem; border-radius: 999px;
-    background: linear-gradient(180deg, rgba(150,175,210,.24), rgba(40,55,80,.4));
-    border: 1px solid rgba(190,210,240,.28);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 8px 24px rgba(0,0,0,.45);
-  }
-  .tagasi:hover { color: #fff; border-color: rgba(210,228,250,.55); }
   body { padding-top: 64px !important; }
 }
-@media print { .tagasi { display: none !important; } }
+</style>
+<style id="menyy-css">
+  /* Menüü: nupp viib avalehele, hiirega peale minnes avaneb teiste lehtede loend */
+  .menyy { --m-varv:#dfe8f4; --m-bg:linear-gradient(180deg, rgba(150,175,210,.24), rgba(40,55,80,.4)); --m-serv:1px solid rgba(190,210,240,.28);
+    --m-vari:inset 0 1px 0 rgba(255,255,255,.25), 0 8px 24px rgba(0,0,0,.45); --m-h-bg:linear-gradient(180deg, rgba(185,205,235,.36), rgba(52,70,100,.5)); --m-h-varv:#fff;
+    --p-bg:rgba(14,21,33,.97); --p-serv:1px solid rgba(170,195,230,.22); --p-vari:0 24px 60px rgba(0,0,0,.65); --p-varv:#d5dfec; --h-bg:rgba(159,196,238,.16); --h-varv:#fff; --m-kaal:500;
+    position: fixed; top: 14px; left: 14px; z-index: 2000;
+    font: var(--m-kaal) .92rem/1 "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; letter-spacing: .01em; }
+  .menyy.parem { left: auto; right: 14px; }
+  .menyy.voolus { position: relative; top: auto; left: auto; right: auto; }
+  .menyy .menyy-nupp {
+    display: inline-flex; align-items: center; gap: .55rem; padding: .68rem 1.05rem; border-radius: 999px;
+    text-decoration: none; color: var(--m-varv); background: var(--m-bg); border: var(--m-serv); box-shadow: var(--m-vari);
+    font: inherit; }
+  .menyy .menyy-nupp::after { content: ""; width: .4em; height: .4em; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-.14em) rotate(45deg); opacity: .85; }
+  .menyy:hover .menyy-nupp, .menyy:focus-within .menyy-nupp, .menyy.lahti .menyy-nupp { background: var(--m-h-bg); color: var(--m-h-varv); }
+  .menyy .menyy-loend { display: none; position: absolute; top: 100%; left: 0; padding-top: 8px; min-width: 13.5rem; }
+  .menyy.parem .menyy-loend, .menyy.voolus .menyy-loend { left: auto; right: 0; }
+  .menyy:hover .menyy-loend, .menyy:focus-within .menyy-loend, .menyy.lahti .menyy-loend { display: block; }
+  .menyy .menyy-paneel { background: var(--p-bg); border: var(--p-serv); border-radius: 14px; padding: .4rem; box-shadow: var(--p-vari); }
+  .menyy .menyy-paneel a { display: block; padding: .66rem .9rem; border-radius: 9px; color: var(--p-varv); text-decoration: none; white-space: nowrap; font: inherit; border: 0; background: none; }
+  .menyy .menyy-paneel a:hover, .menyy .menyy-paneel a:focus-visible { background: var(--h-bg); color: var(--h-varv); }
+  .menyy .menyy-paneel a[aria-current] { font-weight: 700; box-shadow: inset 3px 0 0 currentColor; }
+  @media print { .menyy { display: none !important; } }
 </style>
 </head>
 <body>
-<a class="tagasi" href="../">Avaleht</a>
+<div class="menyy " id="menyy">
+  <a class="menyy-nupp" href="../">Avaleht</a>
+  <div class="menyy-loend"><div class="menyy-paneel">
+    <a href="../kell/">Kell</a>
+    <a href="../QR/">QR-kood</a>
+    <a href="../collage/">Kollaaž</a>
+    <a href="../collage2/">Kollaaž 2</a>
+    <a href="../retseptid/kana.html">Kana</a>
+    <a href="../retseptid/sealiha.html">Sealiha</a>
+    <a href="../retseptid/sauda.html">Šašlõkk</a>
+    <a href="../retseptid/pannkook.html" aria-current="page">Pannkoogid</a>
+    <a href="../varjutused/">Päikesevarjutused</a>
+  </div></div>
+</div>
     <div class="container">
         <div class="header">
             <h1>🥞 Lihtsad ülepanni pannkoogid</h1>
@@ -515,5 +542,16 @@
         // Initialize with default values
         calculateIngredients();
     </script>
+<script>
+(function () {   // menüü: puuteekraanil avab esimene puudutus loendi, teine viib avalehele
+  var m = document.getElementById('menyy'); if (!m) return;
+  var n = m.querySelector('.menyy-nupp');
+  n.addEventListener('click', function (e) {
+    if (window.matchMedia('(hover: none)').matches && !m.classList.contains('lahti')) { e.preventDefault(); m.classList.add('lahti'); }
+  });
+  document.addEventListener('click', function (e) { if (!m.contains(e.target)) m.classList.remove('lahti'); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { m.classList.remove('lahti'); if (document.activeElement) document.activeElement.blur(); } });
+})();
+</script>
 </body>
 </html>
