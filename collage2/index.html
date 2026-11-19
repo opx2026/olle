@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veel üks pildikollaaž</title>
+    <style>
+        /* Üldised stiilid */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f4f7f9; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        /* Juhtpaneeli stiilid */
+        .controls { background: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .controls h1 { margin-bottom: 10px; }
+        .controls p { margin-bottom: 20px; color: #555; }
+        
+        /* Valikute (formaat, suund) stiilid */
+        .selectors { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+        .selector-group label { margin-right: 15px; font-weight: 500; cursor: pointer; }
+        .selector-group input[type="radio"] { margin-right: 5px; }
+
+        /* Nuppude stiilid */
+        .file-input-wrapper { margin-bottom: 15px; }
+        .btn { padding: 12px 22px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 500; transition: all 0.2s ease-in-out; }
+        .btn-select { background: #007bff; color: white; }
+        .btn-select:hover { background: #0056b3; }
+        .buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn-clear { background: #dc3545; color: white; }
+        .btn-clear:hover { background: #c82333; }
+        .btn-regenerate { background: #ffc107; color: #212529; }
+        .btn-regenerate:hover { background: #e0a800; }
+        .btn-print { background: #28a745; color: white; }
+        .btn-print:hover { background: #218838; }
+        .btn-download { background: #17a2b8; color: white; }
+        .btn-download:hover { background: #138496; }
+
+        /* Info ja oleku plokid */
+        .info { margin-top: 20px; padding: 15px; background: #e9ecef; border-radius: 8px; font-size: 14px; line-height: 1.6; }
+        #status { margin-top: 10px; font-weight: 500; }
+
+        /* Lehe konteinerite stiilid */
+        .page-container { 
+            background: #e5e7eb; /* Hall taust */
+            margin: 20px auto; 
+            box-shadow: 0 6px 25px rgba(0,0,0,0.1); 
+            overflow: hidden;
+            /* PARANDUS: Kasutame Flexboxi ridade jaoks */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Alustame ülevalt */
+            padding: 4px; 
+            gap: 4px; 
+        }
+        .a4-portrait { width: 210mm; height: 297mm; }
+        .a4-landscape { width: 297mm; height: 210mm; }
+        .a3-portrait { width: 297mm; height: 420mm; }
+        .a3-landscape { width: 420mm; height: 297mm; }
+        
+        /* Ridade konteiner */
+        .row-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            width: 100%;
+        }
+
+        /* Pildi pesa stiilid */
+        .photo-slot {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .photo-slot img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            border: 4px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .photo-slot:hover img {
+            transform: scale(1.02) !important;
+            z-index: 100;
+        }
+
+        .photo-slot .remove-btn {
+            position: absolute; 
+            top: 0; 
+            right: 0;
+            width: 24px; height: 24px;
+            background: rgba(0, 0, 0, 0.6); color: white;
+            border: none;
+            border-radius: 0 0 0 5px;
+            cursor: pointer; font-size: 14px; 
+            z-index: 101;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        .photo-slot:hover .remove-btn { 
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* PARANDATUD: Stiilid printimiseks */
+        @media print {
+            @page {
+                size: auto;
+                margin: 0mm;
+            }
+            html, body {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                height: 100% !important; 
+                background: white !important;
+            }
+            .container {
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: none !important;
+            }
+            .controls, .info {
+                display: none !important;
+            }
+            .page-container {
+                width: 100% !important;
+                height: 100% !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                page-break-after: always !important;
+                justify-content: space-around; /* Jaotab read ühtlaselt */
+            }
+            .remove-btn {
+                display: none !important;
+            }
+            .photo-slot img {
+                transform: none !important; 
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+            }
+        }
+    </style>
+
+<style id="tuuning">
+/* Ühtne tume teraskujundus (sama mis avalehel). Trükivaadet ei muudeta. */
+@media screen {
+  html body {
+    background: #04060b radial-gradient(120% 85% at 50% 0%, #17243a 0%, #080d16 52%, #04060b 100%) fixed !important;
+    color: #d5dfec !important;
+    font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif !important;
+  }
+  body .container, body > .controls, body .container > .controls {
+    background: linear-gradient(165deg, #141d2c, #0a0f19) !important;
+    border: 1px solid rgba(170,195,230,.16) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 30px 80px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.07) !important;
+    color: #d5dfec !important;
+  }
+  body .container > .controls { box-shadow: none !important; border: 0 !important; background: transparent !important; }
+  body .header {
+    background: linear-gradient(180deg, #223149, #111a29) !important;
+    border-bottom: 1px solid rgba(170,195,230,.16) !important;
+    color: #eef4fb !important;
+  }
+  body h1, body h2 { color: #eef4fb !important; text-shadow: none !important; font-weight: 600 !important; letter-spacing: -.01em; }
+  body .header p, body .controls > p { color: #9db0c8 !important; opacity: 1 !important; }
+  body .weight-input, body .portion-input, body .weight-selector, body .instructions, body .timing, body .cooking,
+  body .tips, body .vinegar-choice, body .cooking-tips, body .variations, body .adjustments, body .info,
+  body .recipe-table, body .ingredients, body .calculator {
+    background: rgba(255,255,255,.035) !important;
+    border: 1px solid rgba(170,195,230,.13) !important;
+    border-left: 3px solid #7f9cc0 !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    color: #d5dfec !important;
+  }
+  body .calculator, body .ingredients { background: transparent !important; border: 0 !important; }
+  body .weight-selector .weight-input { background: transparent !important; border: 0 !important; }
+  body h3, body h4, body label, body strong, body .ingredient, body .ingredient-name, body .ingredient-header { color: #eaf1fa !important; }
+  body .amount, body .ingredient-amount, body .weight-input span, body .portion-input span { color: #9fc4ee !important; }
+  body table th { background: #1b273a !important; color: #cfdcec !important; }
+  body table td { border-bottom-color: rgba(170,195,230,.1) !important; color: #d5dfec !important; }
+  body table tr:hover { background: rgba(255,255,255,.04) !important; }
+  body [class$="-item"], body .ingredient-row, body .ingredient-card {
+    background: rgba(255,255,255,.045) !important;
+    border: 1px solid rgba(170,195,230,.13) !important;
+    color: #d5dfec !important;
+    box-shadow: none !important;
+  }
+  body li, body p, body td, body span { color: inherit; }
+  /* koostisosade kaardid (šašlõkimarinaad) */
+  body div.ingredient {
+    background: rgba(255,255,255,.045) !important;
+    border: 1px solid rgba(170,195,230,.13) !important;
+    border-left: 3px solid #7f9cc0 !important;
+    border-radius: 12px !important; box-shadow: none !important; transform: none !important;
+  }
+  body div.ingredient::before { display: none !important; }
+  body div.ingredient .ingredient-amount {
+    background: rgba(159,196,238,.1) !important; border: 1px solid rgba(159,196,238,.35) !important; color: #b9d5f5 !important;
+  }
+  body div.ingredient .ingredient-notes { color: #9db0c8 !important; }
+  body div.ingredient.special-note { background: rgba(240,180,90,.08) !important; border-color: rgba(240,180,90,.4) !important; border-left-color: #f0b45a !important; }
+  body div.ingredient .warning-text { color: #f6c57e !important; }
+  body #fileInfo { border: 0 !important; background: transparent !important; color: #9db0c8 !important; padding-left: 0 !important; }
+  body input[type=number], body input[type=text], body select {
+    background: #0a0f18 !important; color: #eef4fb !important;
+    border: 1px solid rgba(170,195,230,.32) !important; border-radius: 10px !important;
+  }
+  body input:focus, body select:focus { border-color: #9fc4ee !important; box-shadow: 0 0 0 3px rgba(159,196,238,.22) !important; outline: none !important; }
+  body input[type=file] { color: #9db0c8 !important; }
+  body button, body .btn {
+    background: linear-gradient(180deg, #2c3d57, #182336) !important;
+    color: #eef4fb !important;
+    border: 1px solid rgba(180,205,240,.3) !important;
+    border-radius: 999px !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 6px 18px rgba(0,0,0,.35) !important;
+    text-shadow: none !important;
+  }
+  body button:hover:not(:disabled), body .btn:hover:not(:disabled) { background: linear-gradient(180deg, #41587a, #22324b) !important; transform: none !important; }
+  body button:disabled { opacity: .45 !important; cursor: not-allowed; }
+  body :focus-visible { outline: 2px solid #9fc4ee; outline-offset: 2px; }
+  .tagasi {
+    position: fixed; top: 14px; left: 14px; z-index: 50;
+    font: 500 .9rem/1 "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; color: #dfe8f4; text-decoration: none;
+    padding: .65rem 1.05rem; border-radius: 999px;
+    background: linear-gradient(180deg, rgba(150,175,210,.24), rgba(40,55,80,.4));
+    border: 1px solid rgba(190,210,240,.28);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 8px 24px rgba(0,0,0,.45);
+  }
+  .tagasi:hover { color: #fff; border-color: rgba(210,228,250,.55); }
+  body { padding-top: 64px !important; }
+}
+@media print { .tagasi { display: none !important; } }
+</style>
+</head>
+<body>
+<a class="tagasi" href="../">Avaleht</a>
+    <div class="container">
+        <div class="controls">
+            <h1>Veel üks pildikollaaž (png-faili laadimine võtab aega)</h1>
+            <p>Pildid on paigutatud korrapärasesse ja tihedasse ruudustikku. Read on ühtlaselt jaotatud ja viimane rida on alati keskel.</p>
+            
+            <div class="selectors">
+                 <div class="selector-group">
+                    <strong>Formaat:</strong>
+                    <label><input type="radio" name="format" value="a4" checked onchange="updateLayout()"> A4</label>
+                    <label><input type="radio" name="format" value="a3" onchange="updateLayout()"> A3</label>
+                </div>
+                <div class="selector-group">
+                    <strong>Suund:</strong>
+                    <label><input type="radio" name="orientation" value="portrait" checked onchange="updateLayout()"> Portree</label>
+                    <label><input type="radio" name="orientation" value="landscape" onchange="updateLayout()"> Rõhtne</label>
+                </div>
+            </div>
+            
+            <div class="file-input-wrapper">
+                <input type="file" id="photos" multiple accept="image/*" style="display: none;">
+                <button type="button" class="btn btn-select" onclick="document.getElementById('photos').click()">📁 Vali pildid...</button>
+            </div>
+            
+            <div class="buttons">
+                 <button class="btn btn-clear" onclick="clearAllPhotos()">🗑️ Tühjenda kõik</button>
+                <button class="btn btn-regenerate" onclick="regenerateLayout()">🔄 Genereeri uus paigutus</button>
+                <button class="btn btn-print" onclick="window.print()">🖨️ Prindi</button>
+                <button class="btn btn-download" onclick="downloadAsPNG()">💾 Laadi alla PNG</button>
+            </div>
+            
+            <div class="info">
+                <strong>Juhised:</strong><br>
+                • Pildid paigutatakse ridadesse, mis välistab kattumise ja tühjad alad.<br>
+                • Igale pildile lisatakse raam, vari ja kerge kaldenurk.<br>
+                • "Genereeri uus paigutus" loob iga kord uue juhusliku kompositsiooni.<br>
+                • Pildi eemaldamiseks liigutage hiir pildile ja klõpsake ilmuval '×' nupul.
+            </div>
+            
+            <div id="status"></div>
+        </div>
+
+        <div class="page-container a4-portrait" id="page"></div>
+    </div>
+
+    <script>
+        let photos = [];
+        const fileInput = document.getElementById('photos');
+        const page = document.getElementById('page');
+        const statusEl = document.getElementById('status');
+
+        fileInput.addEventListener('change', async function(e) {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+
+            const newPhotos = [];
+            for (const file of files) {
+                if (file.type.startsWith('image/')) {
+                    const photoData = await readPhoto(file);
+                    newPhotos.push(photoData);
+                }
+            }
+            photos.push(...newPhotos);
+            updateLayout();
+            e.target.value = '';
+        });
+
+        function readPhoto(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        resolve({
+                            src: event.target.result,
+                            ratio: img.width / img.height
+                        });
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        function updateLayout() {
+            const format = document.querySelector('input[name="format"]:checked').value;
+            const orientation = document.querySelector('input[name="orientation"]:checked').value;
+            page.className = `page-container ${format}-${orientation}`;
+            
+            setTimeout(regenerateLayout, 50);
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        async function regenerateLayout() {
+            page.innerHTML = '';
+             if (photos.length === 0) {
+                page.style.display = 'flex';
+                page.style.alignItems = 'center';
+                page.style.justifyContent = 'center';
+                page.innerHTML = `<div style="color:#ccc; font-size:24px; text-align: center;">Palun valige pildid</div>`;
+                updateStatus();
+                return;
+            }
+
+            page.style.display = 'flex'; 
+            
+            shuffleArray(photos);
+            
+            // Kogu paigutuse loogika on nüüd siin
+            const pageRect = page.getBoundingClientRect();
+            const gap = 4;
+            const PADDING = 4;
+            let targetRowCount = Math.round(Math.sqrt(photos.length / (pageRect.width / pageRect.height)));
+            
+            let rows;
+            while(true) {
+                rows = partitionPhotos(photos, targetRowCount);
+                const totalHeight = calculateLayoutHeight(rows, pageRect.width - PADDING*2, gap);
+                if (totalHeight < pageRect.height) break;
+                targetRowCount++;
+                if (targetRowCount > photos.length) break;
+            }
+            
+            const rowHeight = (pageRect.height - (rows.length + 1) * gap) / rows.length;
+            page.style.gap = `${gap}px`;
+            page.style.padding = `${gap}px`;
+
+            rows.forEach(row => {
+                const rowContainer = document.createElement('div');
+                rowContainer.className = 'row-container';
+                rowContainer.style.height = `${rowHeight}px`;
+
+                row.forEach(photo => {
+                    const slot = createPhotoSlot(photo);
+                    rowContainer.appendChild(slot);
+                });
+                page.appendChild(rowContainer);
+            });
+            updateStatus({cols: Math.ceil(photos.length/rows.length), rows: rows.length});
+        }
+        
+        function partitionPhotos(photos, targetRowCount) {
+            let rows = Array.from({ length: targetRowCount }, () => []);
+            let rowRatios = Array(targetRowCount).fill(0);
+            
+            photos.forEach(photo => {
+                let bestRowIndex = rowRatios.indexOf(Math.min(...rowRatios));
+                rows[bestRowIndex].push(photo);
+                rowRatios[bestRowIndex] += photo.ratio;
+            });
+
+            return rows;
+        }
+
+        function calculateLayoutHeight(rows, containerWidth, gap) {
+            return rows.reduce((totalHeight, row) => {
+                const rowRatio = row.reduce((sum, p) => sum + p.ratio, 0);
+                const rowHeight = (containerWidth - (row.length - 1) * gap) / rowRatio;
+                return totalHeight + rowHeight;
+            }, (rows.length - 1) * gap);
+        }
+
+        function createPhotoSlot(photo) {
+            const slot = document.createElement('div');
+            slot.className = 'photo-slot';
+
+            const img = document.createElement('img');
+            img.src = photo.src;
+            img.alt = `Pilt`;
+
+            const randomRotation = (Math.random() - 0.5) * 4; 
+            img.style.transform = `rotate(${randomRotation}deg)`;
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.innerHTML = '×';
+            removeBtn.onclick = (event) => {
+                event.stopPropagation();
+                const photoIndexToRemove = photos.findIndex(p => p.src === photo.src);
+                if (photoIndexToRemove > -1) {
+                     photos.splice(photoIndexToRemove, 1);
+                     updateLayout();
+                }
+            };
+
+            slot.appendChild(img);
+            slot.appendChild(removeBtn);
+            return slot;
+        }
+        
+        function clearAllPhotos() {
+            if (photos.length > 0) {
+                photos = [];
+                updateLayout();
+            }
+        }
+        
+        function updateStatus(grid) {
+            const format = document.querySelector('input[name="format"]:checked').value.toUpperCase();
+            const orientation = document.querySelector('input[name="orientation"]:checked').value === 'portrait' ? 'Portree' : 'Rõhtne';
+            const gridText = grid && photos.length > 0 ? ` • <strong>Paigutus:</strong> u ${grid.cols}×${grid.rows}` : '';
+            statusEl.innerHTML = `<strong>Pilte laaditud:</strong> ${photos.length} • <strong>Formaat:</strong> ${format} (${orientation})${gridText}`;
+        }
+
+        async function downloadAsPNG() {
+            if (photos.length === 0) {
+                alert('Pole pilte, mida alla laadida!');
+                return;
+            }
+            if (typeof html2canvas === 'undefined') {
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                document.head.appendChild(script);
+                script.onload = () => capturePage();
+                script.onerror = () => alert('Viga allalaadimise skripti laadimisel. Palun proovige uuesti.');
+            } else {
+                capturePage();
+            }
+        }
+
+        function capturePage() {
+            const removeButtons = page.querySelectorAll('.remove-btn');
+            removeButtons.forEach(btn => btn.style.display = 'none');
+            
+            const format = document.querySelector('input[name="format"]:checked').value;
+
+            html2canvas(page, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#e5e7eb',
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `pildikollaaz-${format}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                removeButtons.forEach(btn => btn.style.display = '');
+            }).catch(err => {
+                console.error('Viga PNG genereerimisel:', err);
+                alert('Vabandust, pildi genereerimisel tekkis viga.');
+                removeButtons.forEach(btn => btn.style.display = '');
+            });
+        }
+
+        // Esmane käivitus
+        updateLayout();
+    </script>
+</body>
+</html>
