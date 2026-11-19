@@ -45,41 +45,38 @@ td.below { color:#a0a0a0 !important; text-decoration:line-through; }
 
 <style id="tuuning">
 /* Tume teraskujundus nagu avalehel */
-:root { --ink:#d5dfec; --sea:#9db0c8; --mist:#04060b; --umbra:#cfe0f7; --corona:#e3b341; --partial:#f08a5d; --line:rgba(170,195,230,.16); }
+:root { --ink:#dfe7f2; --sea:#b3c3d8; --mist:#04060b; --umbra:#2b2140; --corona:#e3b341; --partial:#f08a5d; --line:rgba(170,195,230,.16); }
 html body {
-  background: #04060b radial-gradient(120% 85% at 50% 0%, #17243a 0%, #080d16 52%, #04060b 100%) fixed;
+  background: linear-gradient(180deg, #2a3a52 0%, #212e43 100%) fixed;   /* keskmine terasesinine, et hele kaart ja paneelid ei oleks liiga suures kontrastis */
   color: var(--ink); font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
 }
-body > header { background: linear-gradient(180deg, rgba(34,49,73,.55), rgba(17,26,41,.2)); padding-right: 150px; }
+body > header { background: linear-gradient(180deg, #2f4059, #293950); padding-right: 150px; }
 header h1, .type, .stat .v { font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; font-weight: 600; letter-spacing: -.01em; }
 header h1 { color: #eef4fb; }
-aside { background: linear-gradient(180deg, rgba(20,29,44,.75), rgba(10,15,25,.75)); }
+aside { background: linear-gradient(180deg, #293950, #222f44); }
 select {
-  background: #0a0f18; color: #eef4fb; border: 1px solid rgba(170,195,230,.32); border-radius: 10px;
+  background: #1d293b; color: #eef4fb; border: 1px solid rgba(190,210,240,.34); border-radius: 10px;
 }
 select:focus { outline: none; border-color: #9fc4ee; box-shadow: 0 0 0 3px rgba(159,196,238,.22); }
 input[type=checkbox] { accent-color: #9fc4ee; }
 .stat, .type, table.times, aside > div[style*="background:#fff"] {
-  background: rgba(255,255,255,.04) !important; border: 1px solid var(--line) !important; color: var(--ink);
+  background: rgba(255,255,255,.055) !important; border: 1px solid var(--line) !important; color: var(--ink);
 }
 .stat, .type, aside > div[style*="background:#fff"] { border-radius: 12px !important; }
 .stat .v { color: #eef4fb; }
-.type.total { background: linear-gradient(180deg, #33476a, #1c2a41) !important; color: #f5e6c8; border-color: rgba(190,210,240,.35) !important; }
+.type.total { background: linear-gradient(180deg, #43597d, #33476a) !important; color: #f5e6c8; border-color: rgba(190,210,240,.35) !important; }
 .type.annular { border-left: 4px solid var(--corona) !important; border-radius: 0 12px 12px 0 !important; }
 .type.partial { border-left: 4px solid var(--partial) !important; border-radius: 0 12px 12px 0 !important; }
 table.times td { border-top-color: rgba(170,195,230,.1); }
 table.times td:last-child { color: #b9d5f5; }
 td.below { color: #6f7f94 !important; }
-#moondisc { fill: #0b111c; }                 /* kuu = paneeli taust, et päikesest jääks „amps" */
+#moondisc { fill: #2f3d54; }                 /* kuu = paneeli taust, et päikesest jääks „amps" */
 .safety { background: rgba(225,90,90,.1); border-color: rgba(225,120,120,.4); color: #f2bcbc; }
-/* kaart: tumedaks toonitud plaadid ja terasetooni nupud */
-#map { background: #060a12; }
-.leaflet-tile-pane { filter: invert(1) hue-rotate(195deg) brightness(.82) contrast(.92) saturate(.55); }
-.leaflet-bar { border: 1px solid rgba(190,210,240,.3) !important; box-shadow: 0 8px 24px rgba(0,0,0,.45) !important; }
-.leaflet-bar a, .leaflet-bar a:hover { background: #141d2c; color: #dfe8f4; border-bottom-color: rgba(170,195,230,.2); }
-.leaflet-bar a:hover { background: #22324b; }
-.leaflet-control-attribution { background: rgba(10,15,25,.8) !important; color: #9db0c8 !important; }
-.leaflet-control-attribution a { color: #b9d5f5 !important; }
+/* kaart jääb algne hele; ainult nupud on terasetooni. Legendi värviruudud saavad heleda ääre, et tumedal paneelil näha oleks */
+.legend span { outline: 1px solid rgba(255,255,255,.4); }
+.leaflet-bar { border: 1px solid rgba(190,210,240,.35) !important; box-shadow: 0 4px 14px rgba(20,30,50,.3) !important; }
+.leaflet-bar a, .leaflet-bar a:hover { background: #2f4059; color: #eef4fb; border-bottom-color: rgba(190,210,240,.25); }
+.leaflet-bar a:hover { background: #3d5273; }
 :focus-visible { outline: 2px solid #9fc4ee; outline-offset: 2px; }
 </style>
 <style id="menyy-css">
@@ -105,7 +102,7 @@ td.below { color: #6f7f94 !important; }
   .menyy .menyy-paneel a:hover, .menyy .menyy-paneel a:focus-visible { background: var(--h-bg); color: var(--h-varv); }
   .menyy .menyy-paneel a[aria-current] { font-weight: 700; box-shadow: inset 3px 0 0 currentColor; }
   @media print { .menyy { display: none !important; } }
-  .menyy.parem { top: 9px; right: 12px; }
+  .menyy.parem { top: 9px; right: 12px; --p-bg:#26344a; --m-bg:linear-gradient(180deg, rgba(170,195,230,.22), rgba(90,115,155,.25)); --m-vari:inset 0 1px 0 rgba(255,255,255,.2), 0 4px 14px rgba(20,30,50,.3); --p-vari:0 16px 40px rgba(15,22,38,.45); }
 </style>
 </head>
 <body>
@@ -172,8 +169,8 @@ td.below { color: #6f7f94 !important; }
     </div>
     <div class="coords" id="coords">–</div>
     <div class="legend">
-      <div><span style="background:#cfe0f7; opacity:0.55;"></span>Täisvari (täielik varjutus)</div>
-      <div><span style="background:#e3b341; opacity:0.55;"></span>Rõngasvari (rõngakujuline)</div>
+      <div><span style="background:#2b2140; opacity:0.55;"></span>Täisvari (täielik varjutus)</div>
+      <div><span style="background:#b8860b; opacity:0.55;"></span>Rõngasvari (rõngakujuline)</div>
       <div><span style="background:transparent; border:2px dashed #d85a30; height:8px;"></span>Poolvari (osaline varjutus, päike horisondi kohal)</div>
     </div>
     <div class="safety"><strong>Silmade ohutus:</strong> ära vaata otse päikesesse ilma sertifitseeritud varjutusprillideta (ISO 12312-2). Tavalised päikeseprillid ei kaitse. Optika ette ainult objektiivipoolne päikesefilter.</div>
@@ -249,7 +246,7 @@ function sunEvent(direction, searchBack) {
 }
 function dirLabel(pos, color, text) {
   return L.marker(pos, { interactive: false, icon: L.divIcon({ className: '',
-    html: '<div style="font: 500 12px Archivo, sans-serif; color:' + color + '; text-shadow: 0 0 3px #04060b, 0 0 3px #04060b; white-space: nowrap;">' + text + '</div>',
+    html: '<div style="font: 500 12px Archivo, sans-serif; color:' + color + '; text-shadow: 0 0 3px #fff, 0 0 3px #fff; white-space: nowrap;">' + text + '</div>',
     iconSize: [160, 16], iconAnchor: [0, 8] }) });
 }
 function drawSunDirs() {
@@ -258,15 +255,15 @@ function drawSunDirs() {
   if (riseOn) {
     const r = sunEvent(+1, true);
     if (r) {
-      dirLayers.push(L.polyline([[curLat, curLon], dest(curLat, curLon, r.az, 40)], { color: '#e3b341', weight: 3, dashArray: '6 6' }).addTo(map));
-      dirLayers.push(dirLabel(dest(curLat, curLon, r.az, 46), '#f0cd6a', 'tõus ' + Math.round(r.az) + '° kell ' + fmtT(r.time)).addTo(map));
+      dirLayers.push(L.polyline([[curLat, curLon], dest(curLat, curLon, r.az, 40)], { color: '#b8860b', weight: 3, dashArray: '6 6' }).addTo(map));
+      dirLayers.push(dirLabel(dest(curLat, curLon, r.az, 46), '#7a5a08', 'tõus ' + Math.round(r.az) + '° kell ' + fmtT(r.time)).addTo(map));
     }
   }
   if (setOn) {
     const s = sunEvent(-1, false);
     if (s) {
       dirLayers.push(L.polyline([[curLat, curLon], dest(curLat, curLon, s.az, 40)], { color: '#d85a30', weight: 3, dashArray: '6 6' }).addTo(map));
-      dirLayers.push(dirLabel(dest(curLat, curLon, s.az, 46), '#ffa27e', 'loojang ' + Math.round(s.az) + '° kell ' + fmtT(s.time)).addTo(map));
+      dirLayers.push(dirLabel(dest(curLat, curLon, s.az, 46), '#993c1d', 'loojang ' + Math.round(s.az) + '° kell ' + fmtT(s.time)).addTo(map));
     }
   }
 }
@@ -276,11 +273,11 @@ const DirCtl = L.Control.extend({ options: { position: 'topleft' }, onAdd() {
   const mk = (label, get, set) => {
     const b = L.DomUtil.create('button', '', box);
     b.textContent = label;
-    b.style.cssText = 'background:#141d2c; color:#dfe8f4; border:1px solid rgba(190,210,240,.3); border-radius:999px; padding:7px 12px; font:500 12px "Segoe UI",system-ui,sans-serif; cursor:pointer; text-align:left; box-shadow:0 6px 18px rgba(0,0,0,.4);';
+    b.style.cssText = 'background:#2f4059; color:#eef4fb; border:1px solid rgba(190,210,240,.35); border-radius:999px; padding:7px 12px; font:500 12px "Segoe UI",system-ui,sans-serif; cursor:pointer; text-align:left; box-shadow:0 4px 14px rgba(20,30,50,.3);';
     L.DomEvent.on(b, 'click', e => {
       L.DomEvent.stop(e);
       set(!get());
-      b.style.background = get() ? '#3f5a82' : '#141d2c';
+      b.style.background = get() ? '#5b7fb5' : '#2f4059';
       drawSunDirs();
     });
   };
@@ -300,7 +297,7 @@ function drawShadows() {
     shadowLayers.push(L.polygon(ring, { color:'#d85a30', weight:2, dashArray:'6 5', opacity:0.75,
       fill:false, interactive:false }).addTo(map));
   if (s.u && s.u.polys) {
-    const col = c.kind === 'annular' ? '#e3b341' : '#cfe0f7';
+    const col = c.kind === 'annular' ? '#b8860b' : '#2b2140';
     for (const ring of s.u.polys)
       shadowLayers.push(L.polygon(ring,
         { color:col, weight:1, fillColor:col, fillOpacity:0.32, interactive:false }).addTo(map));
@@ -339,7 +336,7 @@ function onPick() {
   if (peakMark) { map.removeLayer(peakMark); peakMark = null; }
   if (c.lat != null) {
     peakMark = L.marker([c.lat, c.lon], { interactive:false, icon: L.divIcon({ className:'',
-      html:'<div style="font-size:22px; line-height:22px; color:#f0cd6a; text-shadow:0 0 4px #04060b, 0 0 4px #04060b;">★</div>', iconSize:[22,22], iconAnchor:[11,11] }) }).addTo(map);
+      html:'<div style="font-size:22px; line-height:22px; color:#d4a017; text-shadow:0 0 3px #fff, 0 0 3px #fff;">★</div>', iconSize:[22,22], iconAnchor:[11,11] }) }).addTo(map);
   }
   compute();
 }
