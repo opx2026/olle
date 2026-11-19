@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lehma Söötmismäng – parandatud</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ---------- ÜLDINE KUJUNDUS ---------- */
+        *{margin:0;padding:0;box-sizing:border-box;font-family:"Comic Sans MS","Segoe UI",Tahoma,sans-serif}
+        body{background:linear-gradient(135deg,#e0f7fa,#c8e6c9);color:#2c3e50;min-height:100vh;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow-x:hidden}
+        .container{max-width:1200px;width:100%;background:rgba(255,255,255,.95);border-radius:25px;padding:20px;box-shadow:0 15px 30px rgba(0,0,0,.15);display:flex;flex-wrap:wrap;gap:20px;justify-content:center}
+        h1{width:100%;text-align:center;font-size:3rem;margin-bottom:10px;color:#27ae60;background:linear-gradient(45deg,#2ecc71,#27ae60);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:2px 2px 4px rgba(0,0,0,.1)}
+        .subtitle{width:100%;text-align:center;font-size:1.4rem;margin-bottom:20px;font-weight:bold;color:#2980b9}
+        /* ---------- PÕHIPANEEL ---------- */
+        .main-panel{flex:1 1 600px;max-width:700px}
+        .cow-display{position:relative;width:100%;height:300px;margin:20px auto;border:6px solid #27ae60;border-radius:20px;overflow:hidden;background:#f8f9fa;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 25px rgba(0,0,0,.1);transition:all .5s ease}
+        #cow-image{max-width:85%;max-height:85%;transition:all .5s ease;filter:drop-shadow(0 5px 10px rgba(0,0,0,.2))}
+        .cow-status{width:100%;text-align:center;margin:20px auto;padding:15px;border-radius:20px;font-size:1.5rem;font-weight:bold;box-shadow:0 5px 15px rgba(0,0,0,.1);background:linear-gradient(135deg,#1abc9c,#16a085);color:#fff;transition:all .5s ease}
+        .controls{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px;width:100%}
+        .feed-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100px;padding:12px 8px;border:none;border-radius:12px;background:linear-gradient(to bottom,#3498db,#2980b9);color:#fff;font-size:1rem;font-weight:bold;cursor:pointer;box-shadow:0 4px 8px rgba(0,0,0,.2);transition:all .3s}
+        .feed-btn i{font-size:2rem;margin-bottom:8px}
+        .feed-btn:hover{transform:translateY(-3px);box-shadow:0 6px 12px rgba(0,0,0,.25)}
+        .feed-btn:active{transform:translateY(1px)}
+        /* ---------- STATISTIKAPANEEL ---------- */
+        .stats-panel{flex:1 1 350px;max-width:450px;background:#f8f9fa;border-radius:20px;padding:20px;box-shadow:0 5px 15px rgba(0,0,0,.1)}
+        .stats-container{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:15px;text-align:left}
+        .stat-card{background:#fff;border-radius:12px;padding:12px;box-shadow:0 3px 8px rgba(0,0,0,.1)}
+        .stat-title{font-weight:bold;margin-bottom:5px;color:#2980b9;font-size:.95rem}
+        .stat-value{font-size:1.6rem;font-weight:bold;color:#27ae60}
+        .progress-container{height:16px;background:#e0e0e0;border-radius:8px;margin-top:5px;overflow:hidden}
+        .progress-bar{height:100%;background:#2ecc71;border-radius:8px;transition:width .5s ease}
+        .goal-indicator{display:flex;align-items:center;justify-content:space-between;margin-top:8px;font-size:.9rem}
+        .goal-achieved{color:#27ae60;font-weight:bold}
+        /* ---------- RESET NUPP ---------- */
+        #reset-btn{display:block;width:100%;max-width:200px;margin:20px auto 0;padding:12px 24px;border:none;border-radius:10px;background:#e74c3c;color:#fff;font-size:1rem;font-weight:bold;cursor:pointer;transition:all .3s}
+        #reset-btn:hover{background:#c0392b;transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,.2)}
+        /* ---------- RESPONSIVE ---------- */
+        @media(max-width:1024px){.controls{grid-template-columns:repeat(3,1fr)}h1{font-size:2.5rem}}
+        @media(max-width:768px){.container{flex-direction:column;padding:15px}.main-panel,.stats-panel{max-width:100%;width:100%}.cow-display{height:250px}.controls{grid-template-columns:repeat(2,1fr);gap:10px}.feed-btn{min-height:90px;font-size:.9rem}.feed-btn i{font-size:1.8rem}.stats-container{grid-template-columns:1fr}.cow-status{font-size:1.3rem;padding:12px}}
+        @media(max-width:480px){body{padding:10px}.container{padding:10px}.cow-display{height:200px;border-width:4px}.feed-btn{min-height:80px;padding:10px 6px}.stat-value{font-size:1.4rem}}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-cow"></i> Lehma Söötmismäng</h1>
+        <div class="subtitle">Sööda lehma tasakaalustatult, et saavutada 35 liitrit piima päevas!</div>
+        <!-- ---------- PÕHIPANEEL ---------- -->
+        <div class="main-panel">
+            <div class="cow-display"><img id="cow-image" src="neutraalne.png" alt="Lehm"></div>
+            <div id="status-message" class="cow-status"><i class="fas fa-info-circle"></i> Alusta lehma söötmist!</div>
+            <div class="controls">
+                <button class="feed-btn" data-feed="silo"><i class="fas fa-wheat-awn"></i>Silo</button>
+                <button class="feed-btn" data-feed="hein"><i class="fas fa-seedling"></i>Hein</button>
+                <button class="feed-btn" data-feed="odrajahu"><i class="fas fa-bread-slice"></i>Odrajahu</button>
+                <button class="feed-btn" data-feed="maisijahu"><i class="fas fa-corn"></i>Maisijahu</button>
+                <button class="feed-btn" data-feed="rapsikoog"><i class="fas fa-oil-can"></i>Rapsikook</button>
+                <button class="feed-btn" data-feed="sojaruott"><i class="fas fa-leaf"></i>Sojasrott</button>
+                <button class="feed-btn" data-feed="kartul"><i class="fas fa-potato"></i>Kartul</button>
+                <button class="feed-btn" data-feed="mineraalsot"><i class="fas fa-pills"></i>Mineraalsööt</button>
+            </div>
+        </div>
+        <!-- ---------- STATISTIKAPANEEL ---------- -->
+        <div class="stats-panel">
+            <h2><i class="fas fa-chart-line"></i> Toiteväärtused</h2>
+            <div class="stats-container">
+                <div class="stat-card"><div class="stat-title">Piim (liitrit/päevas)</div><div class="stat-value" id="milk-output">0.0</div><div class="goal-indicator"><span>Eesmärk: 35 liitrit</span><span id="milk-goal" class="goal-achieved">0%</span></div><div class="progress-container"><div class="progress-bar" id="milk-progress" style="width:0%"></div></div></div>
+                <div class="stat-card"><div class="stat-title">Energia (MJ)</div><div class="stat-value" id="energy-value">0</div><div class="progress-container"><div class="progress-bar" id="energy-progress" style="width:0%"></div></div><div>Soovitus: 160‑180 MJ</div></div>
+                <div class="stat-card"><div class="stat-title">Valk (%)</div><div class="stat-value" id="protein-value">0.0</div><div class="progress-container"><div class="progress-bar" id="protein-progress" style="width:0%"></div></div><div>Soovitus: 16‑18 %</div></div>
+                <div class="stat-card"><div class="stat-title">Kiudained (%)</div><div class="stat-value" id="fiber-value">0.0</div><div class="progress-container"><div class="progress-bar" id="fiber-progress" style="width:0%"></div></div><div>Soovitus: 18‑22 %</div></div>
+                <div class="stat-card"><div class="stat-title">Rasv (%)</div><div class="stat-value" id="fat-value">0.0</div><div class="progress-container"><div class="progress-bar" id="fat-progress" style="width:0%"></div></div><div>Soovitus: 3‑5 %</div></div>
+                <div class="stat-card"><div class="stat-title">Tarbitud sööt (kg)</div><div class="stat-value" id="total-feed">0.0</div><div class="progress-container"><div class="progress-bar" id="feed-progress" style="width:0%"></div></div><div>Maksimaalne: 25 kg</div></div>
+            </div>
+            <button id="reset-btn"><i class="fas fa-redo"></i> Alusta uuesti</button>
+        </div>
+    </div>
+
+    <script>
+        /* ---------- ANDMED SÖÖDA KOHTA ---------- */
+        const FEED_DATA={
+            silo:{energy:10.5,protein:7.0,fiber:22.0,fat:3.0,weight:1.0},
+            hein:{energy:7.2,protein:8.5,fiber:30.0,fat:2.5,weight:1.0},
+            odrajahu:{energy:13.0,protein:11.0,fiber:5.0,fat:5.0,weight:0.5},
+            maisijahu:{energy:14.0,protein:8.0,fiber:3.0,fat:3.5,weight:0.5},
+            rapsikoog:{energy:12.5,protein:35.0,fiber:12.0,fat:10.0,weight:0.3},
+            sojaruott:{energy:13.8,protein:45.0,fiber:7.0,fat:2.0,weight:0.3},
+            kartul:{energy:3.5,protein:2.0,fiber:2.0,fat:0.2,weight:1.0},
+            mineraalsot:{energy:0.0,protein:0.0,fiber:0.0,fat:0.0,weight:0.1,minerals:true}
+        };
+        /* ---------- LEHMA PILDID ---------- */
+        const COW_STATES={initial:"neutraalne.png",happy:"happy.png",neutral:"neutraalne.png",sad:"kurb.png",sick:"kurb.png"};
+        /* ---------- MÄNGU OLEK ---------- */
+        let gameState={totalFeed:0,energy:0,protein:0,fiber:0,fat:0,milkOutput:0,minerals:false};
+        /* ---------- DOM ELEMENDID ---------- */
+        const cowImage=document.getElementById("cow-image");
+        const statusMessage=document.getElementById("status-message");
+        const milkOutputEl=document.getElementById("milk-output");
+        const energyValue=document.getElementById("energy-value");
+        const proteinValue=document.getElementById("protein-value");
+        const fiberValue=document.getElementById("fiber-value");
+        const fatValue=document.getElementById("fat-value");
+        const totalFeedEl=document.getElementById("total-feed");
+        const resetBtn=document.getElementById("reset-btn");
+        /* ---------- NUPUD ---------- */
+        document.querySelectorAll('.feed-btn').forEach(btn=>btn.addEventListener('click',()=>feedCow(btn.dataset.feed)));
+        resetBtn.addEventListener('click',resetGame);
+
+        /* ---------- SÖÖTMISLOOGIKA ---------- */
+        function feedCow(feedType){
+            const feed=FEED_DATA[feedType];
+            if(gameState.totalFeed+feed.weight>25){setStatus("Lehm ei saa rohkem süüa – kogus ületab 25 kg!","sick");return;}
+            gameState.totalFeed+=feed.weight;
+            gameState.energy+=feed.energy*feed.weight;
+            gameState.protein+=feed.protein*feed.weight;
+            gameState.fiber+=feed.fiber*feed.weight;
+            gameState.fat+=feed.fat*feed.weight;
+            if(feed.minerals) gameState.minerals=true;
+            calculateMilkOutput();
+            updateUI();
+            updateCowState();
+        }
+
+        /* ---------- PIIMASAAGI ARVUTUS ---------- */
+        function calculateMilkOutput(){
+            if(gameState.totalFeed===0){gameState.milkOutput=0;return;}
+            const proteinPct=gameState.protein/gameState.totalFeed; // %
+            /* Baaspiim sõltub energiast ja valgust. Koefitsiendid kalibreeritud 35 L eesmärgile */
+            const baseMilk=Math.min(gameState.energy*0.2,proteinPct*2);
+            /* Kiudained (%) */
+            const fiberPct=gameState.fiber/gameState.totalFeed;
+            const fiberEffect=fiberPct>=18&&fiberPct<=22?1:fiberPct<18?0.8:0.7;
+            /* Rasv (%) */
+            const fatPct=gameState.fat/gameState.totalFeed;
+            const fatEffect=fatPct>=3&&fatPct<=5?1:fatPct<3?0.9:1.1;
+            const mineralEffect=gameState.minerals?1.05:0.95;
+            gameState.milkOutput=baseMilk*fiberEffect*fatEffect*mineralEffect;
+        }
+
+        /* ---------- UI UUENDUS ---------- */
+        function updateUI(){
+            const pPct=gameState.totalFeed?gameState.protein/gameState.totalFeed:0;
+            const fPct=gameState.totalFeed?gameState.fiber/gameState.totalFeed:0;
+            const fatPct=gameState.totalFeed?gameState.fat/gameState.totalFeed:0;
+            milkOutputEl.textContent=gameState.milkOutput.toFixed(1);
+            energyValue.textContent=Math.round(gameState.energy);
+            proteinValue.textContent=pPct.toFixed(1);
+            fiberValue.textContent=fPct.toFixed(1);
+            fatValue.textContent=fatPct.toFixed(1);
+            totalFeedEl.textContent=gameState.totalFeed.toFixed(1);
+            updateProgress('milk',gameState.milkOutput,35);
+            updateProgress('energy',gameState.energy,180);
+            updateProgress('protein',pPct,18);
+            updateProgress('fiber',fPct,22);
+            updateProgress('fat',fatPct,5);
+            updateProgress('feed',gameState.totalFeed,25);
+            const milkPerc=Math.min(100,Math.round(gameState.milkOutput/35*100));
+            document.getElementById('milk-goal').textContent=`${milkPerc}%`;
+        }
+        function updateProgress(type,current,max){const perc=Math.min(100,current/max*100);document.getElementById(`${type}-progress`).style.width=`${perc}%`;}
+
+        /* ---------- LEHMA SEISUND ---------- */
+        function updateCowState(){
+            if(gameState.totalFeed===0){setStatus("Sööda lehma, et piima saada!","neutral");return;}
+            const pPct=gameState.protein/gameState.totalFeed;
+            const fPct=gameState.fiber/gameState.totalFeed;
+            const fatPct=gameState.fat/gameState.totalFeed;
+            /* Tervisekontroll – protsentuaalsed piirid */
+            const unhealthy=pPct<14||pPct>22||fPct<16||fPct>28||fatPct>6||gameState.energy>300||gameState.totalFeed>25;
+            if(unhealthy){setStatus("Lehm on haige! Ratsioon on tasakaalust väljas.","sick");return;}
+            if(gameState.milkOutput>=35){setStatus("Suurepärane! Lehm toodab 35 liitrit piima päevas.","happy");}
+            else if(gameState.milkOutput>=25){setStatus("Hästi! Lehm on rõõmus ja toodab piima.","happy");}
+            else if(gameState.milkOutput>=15){setStatus("Lehm on rahulik, kuid vajab rohkem toitu.","neutral");}
+            else{setStatus("Lehm on kurb ega tooda piisavalt piima.","sad");}
+        }
+        /* ---------- STAATUSE ABIFUNKT ---------- */
+        function setStatus(msg,state){statusMessage.innerHTML=`<i class="fas fa-${state==='happy'?'smile':state==='sad'?'frown':'meh'}"></i> ${msg}`;cowImage.src=COW_STATES[state];cowImage.style.transform='scale(1.1)';setTimeout(()=>{cowImage.style.transform='scale(1)';},300)}
+        /* ---------- RESET ---------- */
+        function resetGame(){gameState={totalFeed:0,energy:0,protein:0,fiber:0,fat:0,milkOutput:0,minerals:false};updateUI();setStatus("Mäng algas uuesti – söödame lehma tasakaalustatult.","initial");}
+        /* ---------- INIT ---------- */
+        resetGame();
+    </script>
+</body>
+</html>
