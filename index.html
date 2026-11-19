@@ -207,7 +207,7 @@ void main() {
 
   var hiir = { x: 0, y: 0, sx: 0, sy: 0, j: 0, sj: 0 };   // ruumikoordinaadid, j = tugevus
   var vaade = { x: 0, y: 0 }, pulss = 0;
-  var aeg = 12.0, paus = false;                           // klõps (või tühik) peatab ja käivitab liikumise
+  var aeg = 12.0;
   var algus = performance.now(), eelmine = algus, aeglane = 0, kaader = 0, nahtav = true;
 
   function ruumi(e) {
@@ -241,26 +241,21 @@ void main() {
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     var liigub = hiir.j > .01 || hiir.sj > 0 || pulss > .01;
-    if (nahtav && !paus && (!rahulik || liigub)) kaader = requestAnimationFrame(joonista);
+    if (nahtav && (!rahulik || liigub)) kaader = requestAnimationFrame(joonista);
   }
-  function kaivita() { if (!kaader && nahtav && !paus) { eelmine = performance.now(); kaader = requestAnimationFrame(joonista); } }
+  function kaivita() { if (!kaader && nahtav) { eelmine = performance.now(); kaader = requestAnimationFrame(joonista); } }
 
   window.addEventListener('pointermove', function (e) {
     if (e.target.closest && e.target.closest('#nupud')) { hiir.sj = 0; return; }   // nuppude kohal vedelikku ei tõmmata
     ruumi(e); hiir.sj = 1; kaivita();
   });
-  function lyliti() { paus = !paus; kaivita(); }
-  window.addEventListener('pointerdown', function (e) { if (e.button || e.target.closest('#nupud')) return; ruumi(e); lyliti(); });
-  window.addEventListener('keydown', function (e) { if (e.code === 'Space') { e.preventDefault(); lyliti(); } });
+  // puudutus või klõps tõmbab vedelikku kohe selle koha poole (liikumist ei peata)
+  window.addEventListener('pointerdown', function (e) { if (e.target.closest && e.target.closest('#nupud')) return; ruumi(e); hiir.sj = 1; kaivita(); });
   window.addEventListener('pointerup', function (e) { if (e.pointerType !== 'mouse') hiir.sj = 0; });
   window.addEventListener('pointercancel', function () { hiir.sj = 0; });   // telefonis lõpeb puudutus tihti nii
   window.addEventListener('blur', function () { hiir.sj = 0; });
   document.addEventListener('pointerleave', function () { hiir.sj = 0; });
-  window.addEventListener('resize', function () {
-    moodud();
-    if (paus) { paus = false; eelmine = performance.now(); joonista(eelmine); paus = true; if (kaader) { cancelAnimationFrame(kaader); kaader = 0; } }
-    else kaivita();
-  });
+  window.addEventListener('resize', function () { moodud(); kaivita(); });
   document.addEventListener('visibilitychange', function () { nahtav = !document.hidden; kaivita(); });
 
   moodud();
