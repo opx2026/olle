@@ -48,6 +48,7 @@
   <a href="retseptid/sealiha.html">Sealiha</a>
   <a href="retseptid/sauda.html">Šašlõkk</a>
   <a href="retseptid/pannkook.html">Pannkoogid</a>
+  <a href="varjutused/">Päikesevarjutused</a>
 </nav>
 
 <script id="fs" type="x-shader/x-fragment">
@@ -57,6 +58,8 @@ uniform float uT;
 uniform vec3  uM;      // kursori asukoht ruumis (xy) ja tugevus (z)
 uniform float uPulss;  // klõpsu järel sumbuv lainetus
 uniform vec2  uVaade;  // kaamera kerge kõikumine kursori järgi
+uniform float uSuum;   // väljasuum, et vedelik mahuks vabasse alasse ära
+uniform float uNihe;   // pildi keskpunkti nihe üles, et vedelik jääks nuppude kohal vaba ala keskele
 
 float smin(float a, float b, float k) {
   float h = clamp(.5 + .5 * (b - a) / k, 0., 1.);
@@ -111,6 +114,8 @@ float ymbrus(vec3 r) {
 float juhus(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
 void main() {
   vec2 uv = (gl_FragCoord.xy - .5 * uRes) / min(uRes.x, uRes.y);
+  uv.y -= uNihe;
+  uv *= uSuum;
   vec3 ro = vec3(uVaade * .55, 3.7);
   vec3 siht = vec3(0.);
   vec3 ett = normalize(siht - ro);
@@ -182,12 +187,20 @@ void main() {
   gl.enableVertexAttribArray(a); gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
   var uRes = gl.getUniformLocation(pr, 'uRes'), uT = gl.getUniformLocation(pr, 'uT'),
       uM = gl.getUniformLocation(pr, 'uM'), uPulss = gl.getUniformLocation(pr, 'uPulss'),
-      uVaade = gl.getUniformLocation(pr, 'uVaade');
+      uVaade = gl.getUniformLocation(pr, 'uVaade'), uNihe = gl.getUniformLocation(pr, 'uNihe'), uSuum = gl.getUniformLocation(pr, 'uSuum');
 
   var skaala = Math.min(window.devicePixelRatio || 1, 1.5);   // joonistustihedus, kohandub kiiruse järgi
-  var W = 0, H = 0;
+  var W = 0, H = 0, nihePx = 0, suum = 1;
+  var nupud = document.getElementById('nupud');
   function moodud() {
     W = window.innerWidth; H = window.innerHeight;
+    // nuppude riba võtab alt ruumi: nihuta vedelik selle võrra üles, et ta oleks vaba ala keskel
+    var riba = nupud ? Math.max(0, H - nupud.getBoundingClientRect().top) : 0;
+    riba = Math.min(riba, H * .45);
+    nihePx = riba / 2;
+    // vedelik on umbes 1,25 × väiksema külje laiune ja 0,95 × kõrgune: suumi välja, kui see vabasse alasse ei mahu
+    var m = Math.min(W, H);
+    suum = Math.max(1, 1.25 * m / W, .95 * m / (H - riba));
     c.width = Math.max(2, Math.round(W * skaala)); c.height = Math.max(2, Math.round(H * skaala));
     gl.viewport(0, 0, c.width, c.height);
   }
@@ -201,8 +214,8 @@ void main() {
     var m = Math.min(W, H);
     // ekraanipunkt -> punkt tasandil z = 0.25 kaamera ees (kaamera kaugus 3.7, fookus 1.55)
     var k = (3.7 - .25) / 1.55;
-    hiir.sx = (e.clientX - W / 2) / m * k;
-    hiir.sy = -(e.clientY - H / 2) / m * k;
+    hiir.sx = (e.clientX - W / 2) / m * k * suum;
+    hiir.sy = -(e.clientY - (H / 2 - nihePx)) / m * k * suum;
   }
 
   function joonista(praegu) {
@@ -223,6 +236,8 @@ void main() {
     gl.uniform3f(uM, hiir.x, hiir.y, hiir.j);
     gl.uniform1f(uPulss, pulss);
     gl.uniform2f(uVaade, vaade.x, vaade.y);
+    gl.uniform1f(uNihe, nihePx / Math.min(W, H));
+    gl.uniform1f(uSuum, suum);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     var liigub = hiir.j > .01 || hiir.sj > 0 || pulss > .01;
@@ -230,11 +245,16 @@ void main() {
   }
   function kaivita() { if (!kaader && nahtav && !paus) { eelmine = performance.now(); kaader = requestAnimationFrame(joonista); } }
 
-  window.addEventListener('pointermove', function (e) { ruumi(e); hiir.sj = 1; kaivita(); });
+  window.addEventListener('pointermove', function (e) {
+    if (e.target.closest && e.target.closest('#nupud')) { hiir.sj = 0; return; }   // nuppude kohal vedelikku ei tõmmata
+    ruumi(e); hiir.sj = 1; kaivita();
+  });
   function lyliti() { paus = !paus; kaivita(); }
   window.addEventListener('pointerdown', function (e) { if (e.button || e.target.closest('#nupud')) return; ruumi(e); lyliti(); });
   window.addEventListener('keydown', function (e) { if (e.code === 'Space') { e.preventDefault(); lyliti(); } });
   window.addEventListener('pointerup', function (e) { if (e.pointerType !== 'mouse') hiir.sj = 0; });
+  window.addEventListener('pointercancel', function () { hiir.sj = 0; });   // telefonis lõpeb puudutus tihti nii
+  window.addEventListener('blur', function () { hiir.sj = 0; });
   document.addEventListener('pointerleave', function () { hiir.sj = 0; });
   window.addEventListener('resize', function () {
     moodud();
