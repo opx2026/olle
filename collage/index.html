@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piltide Kollaaži Generaator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: inline-block;
+            width: 150px;
+            font-weight: bold;
+        }
+        
+        select, input[type="file"] {
+            padding: 5px;
+            margin: 5px;
+        }
+        
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        #printButton {
+            background-color: #2196F3;
+        }
+        
+        #printButton:hover {
+            background-color: #0b7dda;
+        }
+        
+        #exportButton {
+            background-color: #FF9800;
+        }
+        
+        #exportButton:hover {
+            background-color: #e68900;
+        }
+        
+        .info {
+            color: #666;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .preview-container {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .image-item {
+            position: absolute;
+            overflow: hidden;
+            line-height: 0;
+        }
+        
+        .image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        
+        @media print {
+            body {
+                margin: 0;
+                background: white;
+            }
+            
+            .controls {
+                display: none;
+            }
+            
+            .preview-container {
+                box-shadow: none;
+                margin: 0;
+                page-break-after: avoid;
+            }
+        }
+    </style>
+
+<style id="tuuning">
+/* Ühtne tume teraskujundus (sama mis avalehel). Trükivaadet ei muudeta. */
+@media screen {
+  html body {
+    background: #04060b radial-gradient(120% 85% at 50% 0%, #17243a 0%, #080d16 52%, #04060b 100%) fixed !important;
+    color: #d5dfec !important;
+    font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif !important;
+  }
+  body .container, body > .controls, body .container > .controls {
+    background: linear-gradient(165deg, #141d2c, #0a0f19) !important;
+    border: 1px solid rgba(170,195,230,.16) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 30px 80px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.07) !important;
+    color: #d5dfec !important;
+  }
+  body .container > .controls { box-shadow: none !important; border: 0 !important; background: transparent !important; }
+  body .header {
+    background: linear-gradient(180deg, #223149, #111a29) !important;
+    border-bottom: 1px solid rgba(170,195,230,.16) !important;
+    color: #eef4fb !important;
+  }
+  body h1, body h2 { color: #eef4fb !important; text-shadow: none !important; font-weight: 600 !important; letter-spacing: -.01em; }
+  body .header p, body .controls > p { color: #9db0c8 !important; opacity: 1 !important; }
+  body .weight-input, body .portion-input, body .weight-selector, body .instructions, body .timing, body .cooking,
+  body .tips, body .vinegar-choice, body .cooking-tips, body .variations, body .adjustments, body .info,
+  body .recipe-table, body .ingredients, body .calculator {
+    background: rgba(255,255,255,.035) !important;
+    border: 1px solid rgba(170,195,230,.13) !important;
+    border-left: 3px solid #7f9cc0 !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    color: #d5dfec !important;
+  }
+  body .calculator, body .ingredients { background: transparent !important; border: 0 !important; }
+  body .weight-selector .weight-input { background: transparent !important; border: 0 !important; }
+  body h3, body h4, body label, body strong, body .ingredient, body .ingredient-name, body .ingredient-header { color: #eaf1fa !important; }
+  body .amount, body .ingredient-amount, body .weight-input span, body .portion-input span { color: #9fc4ee !important; }
+  body table th { background: #1b273a !important; color: #cfdcec !important; }
+  body table td { border-bottom-color: rgba(170,195,230,.1) !important; color: #d5dfec !important; }
+  body table tr:hover { background: rgba(255,255,255,.04) !important; }
+  body [class$="-item"], body .ingredient-row, body .ingredient-card {
+    background: rgba(255,255,255,.045) !important;
+    border: 1px solid rgba(170,195,230,.13) !important;
+    color: #d5dfec !important;
+    box-shadow: none !important;
+  }
+  body li, body p, body td, body span { color: inherit; }
+  /* koostisosade kaardid (šašlõkimarinaad) */
+  body div.ingredient {
+    background: rgba(255,255,255,.045) !important;
+    border: 1px solid rgba(170,195,230,.13) !important;
+    border-left: 3px solid #7f9cc0 !important;
+    border-radius: 12px !important; box-shadow: none !important; transform: none !important;
+  }
+  body div.ingredient::before { display: none !important; }
+  body div.ingredient .ingredient-amount {
+    background: rgba(159,196,238,.1) !important; border: 1px solid rgba(159,196,238,.35) !important; color: #b9d5f5 !important;
+  }
+  body div.ingredient .ingredient-notes { color: #9db0c8 !important; }
+  body div.ingredient.special-note { background: rgba(240,180,90,.08) !important; border-color: rgba(240,180,90,.4) !important; border-left-color: #f0b45a !important; }
+  body div.ingredient .warning-text { color: #f6c57e !important; }
+  body #fileInfo { border: 0 !important; background: transparent !important; color: #9db0c8 !important; padding-left: 0 !important; }
+  body input[type=number], body input[type=text], body select {
+    background: #0a0f18 !important; color: #eef4fb !important;
+    border: 1px solid rgba(170,195,230,.32) !important; border-radius: 10px !important;
+  }
+  body input:focus, body select:focus { border-color: #9fc4ee !important; box-shadow: 0 0 0 3px rgba(159,196,238,.22) !important; outline: none !important; }
+  body input[type=file] { color: #9db0c8 !important; }
+  body button, body .btn {
+    background: linear-gradient(180deg, #2c3d57, #182336) !important;
+    color: #eef4fb !important;
+    border: 1px solid rgba(180,205,240,.3) !important;
+    border-radius: 999px !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 6px 18px rgba(0,0,0,.35) !important;
+    text-shadow: none !important;
+  }
+  body button:hover:not(:disabled), body .btn:hover:not(:disabled) { background: linear-gradient(180deg, #41587a, #22324b) !important; transform: none !important; }
+  body button:disabled { opacity: .45 !important; cursor: not-allowed; }
+  body :focus-visible { outline: 2px solid #9fc4ee; outline-offset: 2px; }
+  .tagasi {
+    position: fixed; top: 14px; left: 14px; z-index: 50;
+    font: 500 .9rem/1 "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; color: #dfe8f4; text-decoration: none;
+    padding: .65rem 1.05rem; border-radius: 999px;
+    background: linear-gradient(180deg, rgba(150,175,210,.24), rgba(40,55,80,.4));
+    border: 1px solid rgba(190,210,240,.28);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 8px 24px rgba(0,0,0,.45);
+  }
+  .tagasi:hover { color: #fff; border-color: rgba(210,228,250,.55); }
+  body { padding-top: 64px !important; }
+}
+@media print { .tagasi { display: none !important; } }
+</style>
+</head>
+<body>
+<a class="tagasi" href="../">Avaleht</a>
+    <div class="controls">
+        <h2>Piltide kollaaži generaator</h2>
+        
+        <div class="control-group">
+            <label for="paperSize">Paberi suurus:</label>
+            <select id="paperSize">
+                <option value="a4">A4</option>
+                <option value="a3">A3</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <label for="orientation">Orientatsioon:</label>
+            <select id="orientation">
+                <option value="portrait">Portree (püstine)</option>
+                <option value="landscape">Maastik (rõhtne)</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <label for="imageFiles">Vali pildid:</label>
+            <input type="file" id="imageFiles" multiple accept="image/*">
+            <div class="info" id="fileInfo">Valige kuni 100 pilti</div>
+        </div>
+        
+        <button id="generateButton" onclick="generateCollage()" disabled>Genereeri kollaaž</button>
+        <button id="printButton" onclick="window.print()">Prindi</button>
+        <button id="exportButton" onclick="exportAsPNG()" disabled>Ekspordi PNG</button>
+    </div>
+    
+    <div id="previewContainer" class="preview-container"></div>
+
+    <script>
+        let loadedImages = [];
+        
+        // Paberi suurused millimeetrites
+        const paperSizes = {
+            a4: { width: 210, height: 297 },
+            a3: { width: 297, height: 420 }
+        };
+        
+        // Teisenda mm piksliteks (96 DPI)
+        function mmToPx(mm) {
+            return mm * 3.7795275591;
+        }
+        
+        // Lae pildid
+        document.getElementById('imageFiles').addEventListener('change', async function(e) {
+            const files = Array.from(e.target.files);
+            const generateBtn = document.getElementById('generateButton');
+            const exportBtn = document.getElementById('exportButton');
+            const fileInfo = document.getElementById('fileInfo');
+            
+            if (files.length === 0) {
+                loadedImages = [];
+                generateBtn.disabled = true;
+                exportBtn.disabled = true;
+                fileInfo.textContent = 'Valige kuni 100 pilti';
+                return;
+            }
+            
+            if (files.length > 100) {
+                alert('Maksimaalselt 100 pilti! Valisite ' + files.length + ' pilti.');
+                e.target.value = '';
+                loadedImages = [];
+                generateBtn.disabled = true;
+                exportBtn.disabled = true;
+                fileInfo.textContent = 'Valige kuni 100 pilti';
+                return;
+            }
+            
+            fileInfo.textContent = `Valitud ${files.length} pilti. Laadimine...`;
+            loadedImages = [];
+            
+            // Lae kõik pildid
+            for (let i = 0; i < files.length; i++) {
+                try {
+                    const base64 = await fileToBase64(files[i]);
+                    loadedImages.push(base64);
+                    fileInfo.textContent = `Laaditud ${i + 1}/${files.length} pilti...`;
+                } catch (error) {
+                    console.error('Viga pildil', files[i].name, error);
+                }
+            }
+            
+            if (loadedImages.length > 0) {
+                fileInfo.textContent = `Laaditud ${loadedImages.length} pilti`;
+                generateBtn.disabled = false;
+            } else {
+                fileInfo.textContent = 'Piltide laadimine ebaõnnestus';
+                generateBtn.disabled = true;
+            }
+        });
+        
+        // Konverteeri fail base64 stringiks
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        function generateCollage() {
+            if (!loadedImages || loadedImages.length === 0) {
+                alert('Palun valige pildid!');
+                return;
+            }
+            
+            const container = document.getElementById('previewContainer');
+            container.innerHTML = '';
+            
+            const paperSize = document.getElementById('paperSize').value;
+            const orientation = document.getElementById('orientation').value;
+            const imageCount = loadedImages.length;
+            
+            // Määra konteineri suurus
+            let width = paperSizes[paperSize].width;
+            let height = paperSizes[paperSize].height;
+            
+            if (orientation === 'landscape') {
+                [width, height] = [height, width];
+            }
+            
+            const containerWidth = mmToPx(width);
+            const containerHeight = mmToPx(height);
+            
+            container.style.width = containerWidth + 'px';
+            container.style.height = containerHeight + 'px';
+            
+            // Lihtne ruudustik paigutus
+            const rectangles = [];
+            
+            // Arvuta optimaalne ruudustik
+            const aspectRatio = containerWidth / containerHeight;
+            let bestCols = 1;
+            let bestRows = imageCount;
+            let bestRatio = Number.MAX_VALUE;
+            
+            // Otsi parim ruudustik
+            for (let cols = 1; cols <= imageCount; cols++) {
+                const rows = Math.ceil(imageCount / cols);
+                const cellWidth = containerWidth / cols;
+                const cellHeight = containerHeight / rows;
+                const cellRatio = cellWidth / cellHeight;
+                const diff = Math.abs(cellRatio - 1);
+                
+                if (diff < bestRatio) {
+                    bestRatio = diff;
+                    bestCols = cols;
+                    bestRows = rows;
+                }
+            }
+            
+            // Loo ruudustik juhuslike suurustega
+            let placedCount = 0;
+            let currentY = 0;
+            
+            for (let row = 0; row < bestRows && placedCount < imageCount; row++) {
+                const itemsInRow = Math.min(bestCols, imageCount - placedCount);
+                const baseHeight = containerHeight / bestRows;
+                let currentX = 0;
+                
+                // Juhuslik rea kõrgus (±20%)
+                const heightVar = 0.8 + Math.random() * 0.4;
+                const rowHeight = row === bestRows - 1 ? 
+                    containerHeight - currentY : // Viimane rida täidab ülejäänud
+                    baseHeight * heightVar;
+                
+                for (let col = 0; col < itemsInRow; col++) {
+                    const baseWidth = containerWidth / itemsInRow;
+                    
+                    // Juhuslik laius (±20%), välja arvatud viimane
+                    const widthVar = 0.8 + Math.random() * 0.4;
+                    const itemWidth = col === itemsInRow - 1 ?
+                        containerWidth - currentX : // Viimane element täidab rea
+                        baseWidth * widthVar;
+                    
+                    rectangles.push({
+                        x: currentX,
+                        y: currentY,
+                        width: itemWidth,
+                        height: rowHeight
+                    });
+                    
+                    currentX += itemWidth;
+                    placedCount++;
+                }
+                
+                currentY += rowHeight;
+            }
+            
+            // Loo HTML elemendid
+            rectangles.forEach((rect, index) => {
+                const div = document.createElement('div');
+                div.className = 'image-item';
+                div.style.left = Math.floor(rect.x) + 'px';
+                div.style.top = Math.floor(rect.y) + 'px';
+                div.style.width = Math.ceil(rect.width) + 'px';
+                div.style.height = Math.ceil(rect.height) + 'px';
+                
+                const imgElement = document.createElement('img');
+                imgElement.src = loadedImages[index];
+                
+                div.appendChild(imgElement);
+                container.appendChild(div);
+            });
+            
+            // Aktiveeri ekspordi nupp
+            document.getElementById('exportButton').disabled = false;
+        }
+        
+        // Treemap algoritm
+        function calculateTreemap(width, height, count) {
+            const rectangles = [];
+            
+            // Alusta kogu alaga
+            const areas = [];
+            const totalArea = width * height;
+            
+            // Genereeri juhuslikud pindalad (±20% keskmisest)
+            const avgArea = totalArea / count;
+            let sumArea = 0;
+            
+            for (let i = 0; i < count; i++) {
+                const variation = 0.8 + Math.random() * 0.4; // 0.8 kuni 1.2
+                const area = avgArea * variation;
+                areas.push(area);
+                sumArea += area;
+            }
+            
+            // Normaliseeri pindalad
+            const scale = totalArea / sumArea;
+            areas.forEach((area, i) => {
+                areas[i] = area * scale;
+            });
+            
+            // Paiguta ristkülikud
+            placeRectangles(0, 0, width, height, areas, 0, rectangles);
+            
+            return rectangles;
+        }
+        
+        function placeRectangles(x, y, width, height, areas, startIdx, result) {
+            if (startIdx >= areas.length) return;
+            
+            const remaining = areas.length - startIdx;
+            if (remaining === 1) {
+                result.push({ x, y, width, height });
+                return;
+            }
+            
+            // Jaga ala kaheks
+            const halfArea = areas.slice(startIdx).reduce((a, b) => a + b, 0) / 2;
+            let sum = 0;
+            let splitIdx = startIdx;
+            
+            for (let i = startIdx; i < areas.length; i++) {
+                sum += areas[i];
+                if (sum >= halfArea) {
+                    splitIdx = i + 1;
+                    break;
+                }
+            }
+            
+            const firstArea = areas.slice(startIdx, splitIdx).reduce((a, b) => a + b, 0);
+            const ratio = firstArea / (firstArea + areas.slice(splitIdx).reduce((a, b) => a + b, 0));
+            
+            // Vali jagamise suund
+            if (width > height) {
+                // Jaga vertikaalselt
+                const splitX = width * ratio;
+                placeRectangles(x, y, splitX, height, areas, startIdx, result);
+                placeRectangles(x + splitX, y, width - splitX, height, areas, splitIdx, result);
+            } else {
+                // Jaga horisontaalselt
+                const splitY = height * ratio;
+                placeRectangles(x, y, width, splitY, areas, startIdx, result);
+                placeRectangles(x, y + splitY, width, height - splitY, areas, splitIdx, result);
+            }
+        }
+        
+        // Ekspordi PNG failina
+        async function exportAsPNG() {
+            const container = document.getElementById('previewContainer');
+            
+            // Loo canvas
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Määra canvas suurus
+            canvas.width = parseInt(container.style.width);
+            canvas.height = parseInt(container.style.height);
+            
+            // Valge taust
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Lae ja joonista kõik pildid
+            const imageElements = container.querySelectorAll('.image-item');
+            
+            for (let elem of imageElements) {
+                const img = elem.querySelector('img');
+                const x = parseInt(elem.style.left);
+                const y = parseInt(elem.style.top);
+                const width = parseInt(elem.style.width);
+                const height = parseInt(elem.style.height);
+                
+                // Loo ajutine pilt
+                const tempImg = new Image();
+                tempImg.src = img.src;
+                await new Promise(resolve => {
+                    tempImg.onload = () => {
+                        ctx.drawImage(tempImg, x, y, width, height);
+                        resolve();
+                    };
+                });
+            }
+            
+            // Salvesta PNG
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'kollaaž.png';
+                a.click();
+                URL.revokeObjectURL(url);
+            }, 'image/png');
+        }
+    </script>
+</body>
+</html>
